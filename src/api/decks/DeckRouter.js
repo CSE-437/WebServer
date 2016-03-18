@@ -1,157 +1,143 @@
-//Register todos with aws dynammodb.
-//https://github.com/yortus/asyncawait
-import Promise from 'bluebird';
-import {Router} from 'express';
-var Parse = require( 'parse/node');
+// Register todos with aws dynammodb.
+// https://github.com/yortus/asyncawait
+import { Router } from 'express';
+const Parse = require('parse/node');
+const randomstring = require('randomstring').generate;
 
-import DeckObject, {DeckUtil} from './DeckModel';
-import TransactionObject, {TransactionUtil} from '../transactions/TransactionModel';
-
+import DeckObject from './DeckModel';
+import TransactionObject from '../transactions/TransactionModel';
 
 const router = new Router();
 
-router.get('/', async (req,res,next) =>{
-  //console.log("IN get all decks")
-  var query = new Parse.Query(DeckObject);
+router.get('/', async (req, res) => {
+  const query = new Parse.Query(DeckObject);
   if (req.query.keywords) {
-    query.containsAll("keywords", req.query.keywords)
+    query.containsAll('keywords', req.query.keywords);
   }
-  if (req.query.name){
-    query.contains("name", req.query.name)
+  if (req.query.name) {
+    query.contains('name', req.query.name);
   }
-  if (req.query.cids){
-    query.containsAll("cids", req.query.cids)
+  if (req.query.cids) {
+    query.containsAll('cids', req.query.cids);
   }
-  if (req.query.owner){
-    query.equalTo("owner", req.query.user)
+  if (req.query.owner) {
+    query.equalTo('owner', req.query.user);
   }
-  if (req.query.gid){
-    query.equalTo("gid", req.query.gid)
+  if (req.query.gid) {
+    query.equalTo('gid', req.query.gid);
   }
-  query.limit(req.query.limit || 20)
-  //console.log(query)
+  query.limit(req.query.limit || 20);
+
   query.find({
-    success: function(results){
-      console.log("Succssfully retrieved ", results, results.map((d)=>d.get("owner")));
-      return res.status(200).send(results.map((d)=>DeckUtil.toObject(d)));
-    },
-    error: function(err){
-      //console.log("Failed to get decks ", err);
-      return res.status(400).send(err)
-    },
-    sessionToken: req.session.sessionToken
+    success: results => res.status(200).json(results.map((d) => d.toJSON())),
+    error: err => res.status(400).json(err),
+    sessionToken: req.session.sessionToken,
   });
 });
-//If deck exist update it. Uses session names
-router.post('/', async (req,res,next) => {
+// Only for posting decks
+router.post('/', async (req, res) => {
+  const query = new Parse.Query(DeckObject);
+  if (!req.body.gid && !req.body.did) {
+    return res.status(400).json({ err: 'Must have a did or gid' });
+  }
 
-  var query = new Parse.Query(DeckObject);
-    if(!req.body.gid  && !req.body.did){
+  if (req.body.gid) {
+    query.equalTo('gid', req.body.gid);
+  } else if (req.body.did) {
+    query.equalTo('gid', `${req.session.username}:${req.body.did}`);
+  }
+  query.find({
+    success: (results) => {
+      if (results[0]) {
+        return res.status(400).json({ error: 'Deck already Exist' });
+      }
+      // TODO : Validate Decks
+      const newDeck = new Parse.Object('Deck');
+      const newDeckBody = req.body;
+      const gid = req.body.gid || `${req.session.username}:${req.body.did}`;
+      const did = gid.split(':')[1];
+      newDeckBody.gid = gid;
+      newDeckBody.did = did;
+      newDeckBody.owner = req.session.username;
 
-      return res.status(400).send({err: "Must have a did or gid"});
-    }
-    if (req.body.gid){
-      query.equalTo("gid", req.body.gid);
-    }else if(req.body.did){
-      query.equalTo("gid", req.session.user.username+':'+req.body.did)
-    }
-    query.find({
-      success: function(results){
-
-        console.log("recieveing decks", results)
-        var creatingDeck = !!results[0];
-        var newDeck = results[0] || new Parse.Object("Deck");
-        //console.log("here4", results)
-        newDeck = DeckUtil.fromRequestBody(newDeck, req.body);
-        var gid = req.body.gid || req.session.user.username +":"+req.body.did
-        var did = Number(gid.split(":")[1]);
-        newDeck.set("gid", gid);
-        newDeck.set("did", did);
-        newDeck.set("owner", req.session.user.username);
-        console.log("Making a new deck", did, gid)
-        newDeck.save(null, {
-            success: function(deck){
-
-          //    console.log("here3")
-              //Associate Deck with User
-              if(creatingDeck){
-                var userQuery = new Parse.Query(Parse.User);
-                userQuery.equalTo("username", req.session.user.username);
-                userQuery.find({
-                  success: function(user){
-                      user.add("decks", deck);
-                      user.save();
-                  }
-                });
-              }
-              return res.status(200).send(DeckUtil.toObject(deck))
+      newDeck.save(newDeckBody, {
+        success: (deck) => {
+          const userQuery = new Parse.Query(Parse.User);
+          userQuery.equalTo('username', req.session.user.username);
+          userQuery.find({
+            success: (user) => {
+              user.add('decks', deck);
+              user.save();
             },
-            error: function(deck, error){
-            //  console.log(newDeck);
-              return res.status(400).send({err: error, deck: DeckUtil.toObject(deck)});
-            },
-            sessionToken: req.session.sessionToken
           });
-      },
-      error: function(err){
 
-        return res.status(500).send({err: err, deck: {}});
-      },
-      sessionToken: req.session.sessionToken
-    })
-
+          return res.status(200).json(deck.toJSON());
+        },
+        error: (deck, error) => res.status(400).json({ error, deck: deck.toJSON() }),
+        sessionToken: req.session.sessionToken,
+      });
+      return null;
+    },
+    error: (err) => res.status(500).json({ error: err, deck: {} }),
+    sessionToken: req.session.sessionToken,
+  });
+  return null;
 });
-router.param('gid', async (req, res, next, gid) =>{
+router.param('gid', async (req, res, next, gid) => {
   req.gid = gid;
-  next()
+  next();
 });
 
-router.get('/:gid', async (req, res, next) => {
-  var query = new Parse.Query(DeckObject);
-  query.equalTo("gid", req.gid);
+router.get('/:gid', async (req, res) => {
+  const query = new Parse.Query(DeckObject);
+  query.equalTo('gid', req.gid);
   query.find({
-    success: function(results){
-      return res.status(200).send(results.map((d)=>DeckUtil.toObject(d)));
-    },
-    error: function(deck, error){
-      return res.status(400).send({err: error, deck: DeckUtil.toObject(deck)});
-    },
-    sessionToken: req.session.sessionToken
+    success: (results) => res.status(200).json(results.map((d) => d.toJSON())),
+    error: (deck, error) => res.status(400).json({ error, deck: deck.toJSON(deck) }),
+    sessionToken: req.session.sessionToken,
   });
 });
-//Expects [transactions] TODO deal with Fork
-router.post('/:gid', async (req, res, next) =>{
-  var current_id = req.gid
-  if (!req.body.isArray && !(req.body.length>0)){
-    return res.status(400).send({err:"Must send array of transactions"})
+
+
+router.post('/:gid', async (req, res) => {
+  const indexGroup = randomstring(30);
+  if (!req.body.isArray && !(req.body.length > 0)) {
+    return res.status(400).json({ error: 'Must send array of transactions' });
   }
-  var transactions = req.body.map(function(body){
-    var t = new Parse.Object("Transaction");
-    return TransactionUtil.fromRequestBody(t, body);
+  const transactions = req.body.map((body, index) => {
+    const t = new Parse.Object('Transaction');
+    Object.keys(body).forEach((key) => t.set(key, body[key]));
+    t.set('on', req.gid);
+    t.set('for', 'Deck');
+    t.set('owner', req.session.username);
+    t.set('indexGroup', indexGroup);
+    t.set('index', index);
+    return t;
   });
-  var parsedTransactions = []
-  transactions.forEach(function(t, index){
-    t.set("on", current_id);
-    t.set("owner", req.session.get("username"));
-    t.set("localIndex", index);
-    t.save(null, {
-      success: function(trans){
-        //TODO maintain order or not
 
-        parsedTransactions.push({transaction: trans, error: null});
-        if(parsedTransactions.length == transactions.length){
-          res.status(200).send(parsedTransactions)
-        }
-      },
-      error: function(trans, error){
+  Parse.Object.saveAll(transactions, {
+    success: (list) => res.status(200).json(list),
+    error: (error) => res.status(500).json(error),
+    sessionToken: req.session.sessionToken,
+  });
+  return null;
+});
 
-        parsedTransactions.push({transaction: trans, error: error});
-        if(parsedTransactions.length == transactions.length){
-          res.status(400).send(parsedTransactions)
-        }
-      },
-      sessionToken: req.session.sessionToken
-    });
+router.get('/:gid/transactions', async(req, res) => {
+  const query = new Parse.Query(TransactionObject);
+  if (req.query.indexGroup) {
+    query.equalTo('indexGroup', req.query.indexGroup);
+  }
+  if (req.query.since) {
+    query.whereGreaterThan('createdAt', req.query.since);
+  }
+  query.limit(req.query.limit || 20);
+  query.descending('createdAt');
+
+  query.find({
+    success: (results) => res.status(200).json(results.map((deck) => deck.toJSON())),
+    error: (error) => res.status(500).json(error),
+    sessionToken: req.session.sessionToken,
   });
 });
 

@@ -1,8 +1,8 @@
-import dispatcher from '../core/Dispatcher'
+import dispatcher from '../core/Dispatcher';
 import DeckActions from '../actions/DeckActions';
 import toastr from 'toastr';
-class DeckStore{
-  constructor(){
+class DeckStore {
+  constructor() {
     this.bindListeners({
       onGetAllDecksSuccess: DeckActions.getAllDecksSuccess,
       onGetAllDecksFail: DeckActions.getAllDecksFail,
@@ -19,41 +19,41 @@ class DeckStore{
     this.workingDeck = null;
     this.transactions = [];
   }
-  onGetAllDecksSuccess(data){
+  onGetAllDecksSuccess(data) {
     this.decks = data;
   }
-  onGetAllDecksFail(data){
+  onGetAllDecksFail(data) {
     toastr.error(data);
   }
-  onUploadDeckSuccess(data){
-    if(this.workingDeck){
+  onUploadDeckSuccess(data) {
+    if (this.workingDeck) {
       this.decks.push(this.workingDeck);
     }
     this.workingDeck = data;
   }
-  onUploadDeckFail(data){
+  onUploadDeckFail(data) {
     toastr.error(data);
   }
-  onGetDeckSuccess(data){
-    if(this.workingDeck){
+  onGetDeckSuccess(data) {
+    if (this.workingDeck) {
       this.decks.push(this.workingDeck);
     }
     this.workingDeck = data;
   }
-  onGetDeckFail(data){
+  onGetDeckFail(data) {
     toastr.error(data);
   }
-  onPostTransactionsSuccess(data){
-    this.transactions.concat(data)
+  onPostTransactionsSuccess(data) {
+    this.transactions.concat(data);
   }
-  onPostTransactionsFail(data){
+  onPostTransactionsFail(data) {
     toastr.error(data);
   }
-  onGetTransactionsSuccess(){
-    this.transactions.concat(data) 
+  onGetTransactionsSuccess(data) {
+    this.transactions.concat(data);
   }
-  onGetTransactionsFail(){
-    toastr.error(data);
+  onGetTransactionsFail(error) {
+    toastr.error(error);
   }
 }
 

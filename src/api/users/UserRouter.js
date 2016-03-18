@@ -39,13 +39,14 @@ router.post('/signup', async (req,res,next) => {
       newUser.set("subscriptions", []);
       newUser.signUp(null,{
         success: function(user){
-          console.log(user.get("sessionToken"))
-          req.session.user = UserUtil.UserToObject(user);
-          req.session.sessionToken = user.get("sessionToken");
-          res.status(200).send({err: null, user: user});
+          req.session.regenerate(function(err){
+            req.session.sessionToken = user.toJSON().sessionToken;
+            req.session.username = user.toJSON().username;
+            res.status(200).send({err: null, user: user});
+          });
         },
         error: function(user, error){
-          res.status(400).send({err: error, user: user})
+          res.status(400).send({err: error, user: user.toJSON()})
         },
         sessionToken: req.session.sessionToken
       });
@@ -55,7 +56,7 @@ router.post('/signup', async (req,res,next) => {
 
 });
 router.get('/whoami', async (req,res,next)=>{
-  res.status(200).send(req.session.user);
+  res.status(200).send(req.session);
 })
 router.post('/login', async (req,res,next) => {
     var username = req.body.username;
@@ -63,18 +64,16 @@ router.post('/login', async (req,res,next) => {
     if(username && password){
       Parse.User.logIn(username, password,{
         success: function(user){
-          console.log("User loging in", user)
-          req.session.user = UserUtil.UserToObject(user);
-          
-          req.session.sessionToken = user.get("sessionToken");
-
-          res.status(200).send({err: null, user: user});
+          req.session.regenerate(function(err){
+            req.session.sessionToken = user.toJSON().sessionToken;
+            req.session.username = user.toJSON().username;
+            req.user = user
+            res.status(200).send({err: null, user: user.toJSON()});
+          });
         },
         error: function(user, error){
-          console.log("here")
-          res.status(400).send({err: error, user: user})
-        },
-        sessionToken: req.session.sessionToken
+          res.status(400).send({err: error, user: user.toJSON()});
+        }
       });
     }else{
       return res.status(400).send({err: {msg: "Need username and password"}});

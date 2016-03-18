@@ -7,7 +7,7 @@ class DeckActions{
   constructor(){
     this.generateActions(
       'getAllDecksFail',
-	    'getAllDecksSuccess',
+      'getAllDecksSuccess',
       'uploadDeckSuccess',
       'uploadDeckFail',
       'getDeckSuccess',
@@ -19,55 +19,55 @@ class DeckActions{
     )
   }
   getAllDecks(options){
-	  var self = this
+    var self = this
     var optionsString = options? '?'+toQueryString(options):'';
     $.get('/api/decks'+optionsString)
-      .done((data)=>{
-		    self.getAllDecksSuccess(data)
-      })
-      .fail((data)=>{
-        self.getAllDecksFail(data)
-      });
+    .done((data)=>{
+      self.getAllDecksSuccess(data)
+    })
+    .fail((data)=>{
+      self.getAllDecksFail(data)
+    });
   }
   uploadDeck(deck){
-	  var self = this;
+    var self = this;
     $.post('/api/decks', decks)
-      .done((data)=>{
-        self.uploadDeckSuccess(data)
-      })
-      .fail((data)=>{
-        self.uploadDeckFail(data)
-      });
+    .done((data)=>{
+      self.uploadDeckSuccess(data)
+    })
+    .fail((data)=>{
+      self.uploadDeckFail(data)
+    });
   }
   getDeck(did){
-	  var self = this;
+    var self = this;
     $.get(`/api/decks/${did}`, )
-      .done((data)=>{
-        self.getDeckSuccess(data)
-      })
-      .fail((data)=>{
-        self.getDeckFail(data)
-      });
+    .done((data)=>{
+      self.getDeckSuccess(data)
+    })
+    .fail((data)=>{
+      self.getDeckFail(data)
+    });
   }
   postTransactions(did, transactions){
-	  var self = this;
+    var self = this;
     $.post(`/api/decks/${did}`, transactions)
-      .done((data)=>{
-        self.postTransactionsSuccess(data)
-      })
-      .fail((data)=>{
-        self.postTransactionsFail(data)
-      });
+    .done((data)=>{
+      self.postTransactionsSuccess(data)
+    })
+    .fail((data)=>{
+      self.postTransactionsFail(data)
+    });
   }
   getTransactions(did){
-	  var self = this;
+    var self = this;
     $.get(`/api/decks/${did}/transactions`)
-      .done((data)=>{
-        self.getTransactionsSuccess(data)
-      })
-      .fail((data)=>{
-        self.getTransactionsFail(data)
-      });
+    .done((data)=>{
+      self.getTransactionsSuccess(data)
+    })
+    .fail((data)=>{
+      self.getTransactionsFail(data)
+    });
   }
 }
 
