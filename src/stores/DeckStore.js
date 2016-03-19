@@ -3,54 +3,49 @@ import DeckActions from '../actions/DeckActions';
 import toastr from 'toastr';
 class DeckStore {
   constructor() {
-    this.bindListeners({
-      onGetAllDecksSuccess: DeckActions.getAllDecksSuccess,
-      onGetAllDecksFail: DeckActions.getAllDecksFail,
-      onUploadDeckSuccess: DeckActions.uploadDeckSuccess,
-      onUploadDeckFail: DeckActions.uploadDeckFail,
-      onGetDeckSuccess: DeckActions.getDeckSuccess,
-      onGetDeckFail: DeckActions.getDeckFail,
-      onPostTransactionsSuccess: DeckActions.postTransactionsSuccess,
-      onPostTransactionsFail: DeckActions.postTransactionsFail,
-      onGetTransactionsSuccess: DeckActions.getTransactionsSuccess,
-      onGetTransactionsFail: DeckActions.getTransactionsFail,
-    });
-    this.decks = [];
-    this.workingDeck = null;
-    this.transactions = [];
+    this.bindActions(DeckActions);
+    this.state = {};
+    this.state.decks = [];
+    this.state.workingDeck = null;
+    this.state.transactions = [];
+    this.state.decksLoaded = false;
+  }
+  onReloadDecks() {
+    this.setState({ decksLoaded: false });
   }
   onGetAllDecksSuccess(data) {
-    this.decks = data;
+    console.log(" Got Decks ");
+    this.setState({ decksLoaded: true, decks: data });
   }
   onGetAllDecksFail(data) {
     toastr.error(data);
   }
   onUploadDeckSuccess(data) {
     if (this.workingDeck) {
-      this.decks.push(this.workingDeck);
+      this.state.decks.push(this.workingDeck);
     }
-    this.workingDeck = data;
+    this.state.workingDeck = data;
   }
   onUploadDeckFail(data) {
     toastr.error(data);
   }
   onGetDeckSuccess(data) {
     if (this.workingDeck) {
-      this.decks.push(this.workingDeck);
+      this.state.decks.push(this.workingDeck);
     }
-    this.workingDeck = data;
+    this.state.workingDeck = data;
   }
   onGetDeckFail(data) {
     toastr.error(data);
   }
   onPostTransactionsSuccess(data) {
-    this.transactions.concat(data);
+    this.state.transactions.concat(data);
   }
   onPostTransactionsFail(data) {
     toastr.error(data);
   }
   onGetTransactionsSuccess(data) {
-    this.transactions.concat(data);
+    this.state.transactions.concat(data);
   }
   onGetTransactionsFail(error) {
     toastr.error(error);

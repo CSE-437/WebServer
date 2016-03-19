@@ -68,15 +68,15 @@ router.post('/login', async (req,res,next) => {
             req.session.sessionToken = user.toJSON().sessionToken;
             req.session.username = user.toJSON().username;
             req.user = user
-            res.status(200).send({err: null, user: user.toJSON()});
+            res.status(200).send(user.toJSON());
           });
         },
         error: function(user, error){
-          res.status(400).send({err: error, user: user.toJSON()});
+          res.status(400).send({  error, user: user.toJSON() });
         }
       });
     }else{
-      return res.status(400).send({err: {msg: "Need username and password"}});
+      return res.status(400).send({ error: {msg: "Need username and password" }});
     }
 
 });

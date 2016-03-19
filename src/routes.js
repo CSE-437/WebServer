@@ -14,15 +14,12 @@ import App from './components/App';
 import ContentPage from './components/ContentPage';
 import ContactPage from './components/ContactPage';
 
-import TodoPage from './components/TodoPage';
 import DeckPage from './components/DeckPage';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import NotFoundPage from './components/NotFoundPage';
 import ErrorPage from './components/ErrorPage';
-//import HomePage from './components/HomePage';
 import ProfilePage from './components/ProfilePage';
-import HomePage from './components/HomePage/HomePage.js';
 /*
 Use a router from react-routing project.
 https://github.com/kriasoft/react-routing
@@ -39,38 +36,37 @@ const router = new Router(on => {
     THIS WAITS FOR MULTIPLE CHILD COMPONENTS
     */
     const component = await next();
-    //This syntacts checks to make sure the component isn't nil, and
-    //Returns the <App context={state.context}>{component}</App>
-    //Equivilent to return (component)? nil : <App context={state.context}>{component}</App>;
+    // This syntacts checks to make sure the component isn't nil, and
+    // Returns the <App context={state.context}>{component}</App>
+    // Equivilent to return (component)? nil : <App context={state.context}>{component}</App>;
     return component && <App context={state.context}>{component}</App>;
   });
-  //Show contact page
+  // Show contact page
   on('/contact', async () => <ContactPage />);
-  //show login page. TODO Implement
+  // show login page. TODO Implement
   on('/login', async () => <LoginPage />);
-  //show register page.
+  // show register page.
   on('/register', async () => <RegisterPage />);
-  //show register page.
-  on('/decks', async () => <DeckPage/>);
-  //show todo page
-  on('/Profile', async() => <ProfilePage/>);
+  // show register page.
+  on('/decks', async () => <DeckPage />);
+  // show todo page
+  on('/Profile', async() => <ProfilePage />);
   //
-  on('/home', async() => <HomePage/>);
 
   on('*', async (state) => {
-    //Gets the api info for that content
+    // Gets the api info for that content
     const response = await fetch(`/api/content?path=${state.path}`);
     const content = await response.json();
-    //Returns the content page. This content page will be inside the app
-    //due to the await next(); statement in the first on
+    // Returns the content page. This content page will be inside the app
+    // due to the await next(); statement in the first on
     return content && <ContentPage {...content} />;
   });
-  //Shows error pages. Custome 404 pages.
+  // Shows error pages. Custome 404 pages.
   on('error', (state, error) => state.statusCode === 404 ?
     <App context={state.context} error={error}><NotFoundPage /></App> :
     <App context={state.context} error={error}><ErrorPage /></App>
   );
 });
 
-//Whenever someoene calls require(routes.js) they will get this function
+// Whenever someoene calls require(routes.js) they will get this function
 export default router;

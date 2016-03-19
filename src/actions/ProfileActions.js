@@ -1,50 +1,63 @@
 import dispatcher from '../core/Dispatcher';
-import $ from 'jquery'
+import $ from 'jquery';
 
-//Remember that this file runs on the client not the server
-class ProfileActions{
-  constructor(){
-    //Each of these actiosn will become a function
+// Remember that this file runs on the client not the server
+class ProfileActions {
+  constructor() {
+    // Each of these actiosn will become a function
     this.generateActions(
       'signUpSuccess',
       'signUpFail',
       'logInSuccess',
       'logInFail',
       'logOutSuccess',
-      'logOutFail'
+      'logOutFail',
+      'getMyDecksSuccess',
+      'getMyDecksFail'
     );
   }
 
-  signUp(info){
-    var self = this;
+  signUp(info) {
+    const self = this;
     $.post('/api/users/signup', info)
-      .done((data)=>{
-        self.signUpSuccess(data)
+      .done((data) => {
+        self.signUpSuccess(data);
       })
-      .fail((data)=>{
-        self.signUpFail(data)
+      .fail((data) => {
+        self.signUpFail(data);
       });
   }
 
-  logIn(info){
-    var self = this;
+  logIn(info) {
+    const self = this;
     $.post('/api/users/login', info)
-      .done((data)=>{
-        self.logInSuccess(data)
+      .done((data) => {
+        self.logInSuccess(data);
       })
-      .fail((data)=>{
-        self.logInFail(data)
+      .fail((data) => {
+        self.logInFail(data);
       });
   }
 
-  logOut(){
-    var self = this;
+  logOut() {
+    const self = this;
     $.post('/api/users/logout')
-      .done((data)=>{
-        self.logOutSucess(data)
+      .done((data) => {
+        self.logOutSuccess(data);
       })
-      .fail((data)=>{
-        self.logOutFail(data)
+      .fail((data) => {
+        self.logOutFail(data);
+      });
+  }
+
+  getMyDecks(username) {
+    const self = this;
+    $.get(`/api/decks?${username}`)
+      .done((data) => {
+        self.getMyDecksSuccess(data);
+      })
+      .fail((data) => {
+        self.getMyDecksFail(data);
       });
   }
 }

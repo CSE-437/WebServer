@@ -8,13 +8,18 @@
  */
 
 import React, { Component, PropTypes } from 'react';
-import cx from 'classnames';
+const objectAssign = require('object-assign');
+import ProfileStore from '../../stores/ProfileStore';
+import ProfileActions from '../../actions/ProfileActions';
 import s from './Navigation.scss';
 import withStyles from '../../decorators/withStyles';
 import Link from '../Link';
 
-import {Navbar, Nav, NavItem, NavDropDown,MenuItem} from 'react-bootstrap';
+import { Navbar, Nav, NavItem } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
+import { Modal, Input, ButtonInput } from 'react-bootstrap';
 
+import toastr from 'toastr';
 @withStyles(s)
 class Navigation extends Component {
 
@@ -22,7 +27,57 @@ class Navigation extends Component {
     className: PropTypes.string,
   };
 
+  constructor(props) {
+    super(props);
+    this.state = objectAssign(ProfileStore.getState(),
+      { showModal: false });
+    // need to use bind so that the this variable for onChange
+    // refers to this DeckPage object not the function
+    this.onChange = this.onChange.bind(this);
+    this.openLogInModal = this.openLogInModal.bind(this);
+    this.closeLogInModal = this.closeLogInModal.bind(this);
+  }
+
+  componentDidMount() {
+    // makes the DeckStore call the onchange function whenever it cnanges.
+    // This is why we had to use bind
+    ProfileStore.listen(this.onChange);
+    // As soon as it is poling for data get data
+  }
+
+  componentWillUnmount() {
+    // remove event listener
+    ProfileStore.unlisten(this.onChange);
+  }
+
+  openLogInModal() {
+    this.setState({ showModal: true });
+  }
+  closeLogInModal() {
+    this.setState({ showModal: false });
+  }
+  logIn(event) {
+    event.preventDefault();
+    const username = event.target[0].value;
+    const password = event.target[1].value;
+    ProfileActions.logIn({ username, password });
+    this.closeLogInModal();
+  }
+
+  logOut() {
+    ProfileActions.logOut();
+  }
+
+  onChange(state) {
+    console.log("new state");
+    this.setState(state)
+  }
+
   render() {
+    const LogInModalButton = (!this.state.loggedIn)?
+      <NavItem onClick = {this.openLogInModal}>Log In</NavItem>:
+      <NavItem onClick = {this.logOut}>Log Out</NavItem>
+
     return (
       <Navbar inverse>
         <Navbar.Header>
@@ -34,12 +89,30 @@ class Navigation extends Component {
         <Navbar.Collapse>
           <Nav>
             <NavItem>{this.props.children}</NavItem>
+            <NavItem>{this.state.loggedIn}</NavItem>
           </Nav>
           <Nav pullRight>
-            <NavItem><a className={s.link} href="/profile" onClick={Link.handleClick}>profile</a></NavItem>
-            <NavItem><a className={s.link} href="/home" onClick={Link.handleClick}>home</a></NavItem>
+            {LogInModalButton}
+            <NavItem href="/profile" onClick={Link.handleClick}>Profile</NavItem>
+            <NavItem href="/decks" onClick={Link.handleClick}>Decks</NavItem>
           </Nav>
         </Navbar.Collapse>
+
+        <Modal show={this.state.showModal} onHide = { this.closeLogInModal }>
+          <Modal.Header closeButton>
+            <Modal.Title id="contained-modal-title-lg">LogIn to AnkiHub</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+          <form onSubmit={ this.logIn.bind(this) }>
+            <Input type="text" label="Username" placeholder="Username" ref="usernameField" value={this.state.username} />
+            <Input type="password" label="Password" ref="passwordField" />
+            <ButtonInput type="submit" value="Log In" />
+          </form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.closeLogInModal}>Close</Button>
+          </Modal.Footer>
+        </Modal>
       </Navbar>
     );
   }

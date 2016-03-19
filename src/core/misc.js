@@ -1,4 +1,5 @@
 export const toQueryString = function(obj, prefix) {
+  
   var str = [];
   for(var p in obj) {
     if (obj.hasOwnProperty(p)) {

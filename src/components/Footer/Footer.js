@@ -11,15 +11,17 @@ import React, { Component } from 'react';
 import s from './Footer.scss';
 import withStyles from '../../decorators/withStyles';
 import Link from '../Link';
-
+import classNames from 'classnames';
 @withStyles(s)
 class Footer extends Component {
 
   render() {
+    const cx = classNames([s.root, 'footer', 'navbar-fixed-bottom']);
+    console.log(cx)
     return (
-      <div className={s.root}>
+      <footer className={cx}>
         sexy footer
-      </div>
+      </footer>
     );
   }
 

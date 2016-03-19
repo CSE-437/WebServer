@@ -12,19 +12,23 @@ const router = new Router();
 router.get('/', async (req, res) => {
   const query = new Parse.Query(DeckObject);
   if (req.query.keywords) {
-    query.containsAll('keywords', req.query.keywords);
+    console.log(req.query.keywords);
+    query.containsAll('keywords', [].concat(req.query.keywords));
   }
   if (req.query.name) {
-    query.contains('name', req.query.name);
+    query.equalTo('name', req.query.name);
   }
   if (req.query.cids) {
-    query.containsAll('cids', req.query.cids);
+    query.containsAll('cids', [].concat(req.query.cids));
   }
   if (req.query.owner) {
     query.equalTo('owner', req.query.user);
   }
   if (req.query.gid) {
     query.equalTo('gid', req.query.gid);
+  }
+  if (req.query.did) {
+    query.equalTo('did', req.query.did);
   }
   query.limit(req.query.limit || 20);
 
@@ -36,6 +40,7 @@ router.get('/', async (req, res) => {
 });
 // Only for posting decks
 router.post('/', async (req, res) => {
+  console.log("here")
   const query = new Parse.Query(DeckObject);
   if (!req.body.gid && !req.body.did) {
     return res.status(400).json({ err: 'Must have a did or gid' });

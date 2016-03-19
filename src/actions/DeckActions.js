@@ -1,11 +1,12 @@
 import dispatcher from '../core/Dispatcher';
 import {toQueryString} from '../core/misc';
-
+import toastr from 'toastr';
 import $ from 'jquery'
 
-class DeckActions{
-  constructor(){
+class DeckActions {
+  constructor() {
     this.generateActions(
+      'reloadDecks',
       'getAllDecksFail',
       'getAllDecksSuccess',
       'uploadDeckSuccess',
@@ -16,17 +17,21 @@ class DeckActions{
       'postTransactionsFail',
       'getTransactionsSuccess',
       'getTransactionsFail'
-    )
+    );
   }
-  getAllDecks(options){
-    var self = this
-    var optionsString = options? '?'+toQueryString(options):'';
-    $.get('/api/decks'+optionsString)
-    .done((data)=>{
-      self.getAllDecksSuccess(data)
+  getAllDecks(options) {
+    const self = this;
+    const optionsString = (options && !($.isEmptyObject(options))) ? `?${$.param(options, true)}` : '';
+    const queryString = `/api/decks${optionsString}`;
+    console.log(queryString);
+    self.reloadDecks();
+    $.get(queryString)
+    .done((data) => {
+      console.log(data)
+      self.getAllDecksSuccess(data);
     })
-    .fail((data)=>{
-      self.getAllDecksFail(data)
+    .fail((data) => {
+      self.getAllDecksFail(data);
     });
   }
   uploadDeck(deck){

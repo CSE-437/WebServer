@@ -1,79 +1,118 @@
-
-
-
 import React, { Component, PropTypes } from 'react';
-import withStyles from '../../decorators/withStyles'; //Applies custmo style
-import s from './DeckPage.scss'; //Import custom styles
+import withStyles from '../../decorators/withStyles'; // Applies custmo style
+import s from './DeckPage.scss'; // Import custom styles
 import DeckStore from '../../stores/DeckStore';
 import DeckActions from '../../actions/DeckActions';
 import Link from '../Link'
+const objectAssign = require('object-assign');
 
-const title = 'Stuff Deck'; //page title
+import Loader from 'react-loader';
+import { Button } from 'react-bootstrap';
+import { Grid, Row, Col } from 'react-bootstrap';
+import DeckList from '../DeckLib/DeckList';
+import SearchBar from '../misc/SearchBar';
 
-@withStyles(s) //sets styles.
+const title = 'Find Decks';
+
+@withStyles(s) // sets styles.
 class DeckPage extends Component {
 
- static contextTypes = {
-   onSetTitle: PropTypes.func.isRequired,
- };
+  static contextTypes = {
+    onSetTitle: PropTypes.func.isRequired,
+  };
 
- //Constroctor for class.
- //REMEBER props and state are two different things.
- //databinding uses props.
- constructor(props){
-   super(props);
-   this.state = DeckStore.getState();
-   //need to use bind so that the this variable for onChange
-   //refers to this DeckPage object not the function
-   this.onChange = this.onChange.bind(this);
- }
+  constructor(props) {
+    super(props);
+    this.state = objectAssign(DeckStore.getState(), { queryOptions: {} });
 
- componentWillMount() {
-   this.context.onSetTitle(title);
- }
+    this.onChange = this.onChange.bind(this);
+  }
 
- //Alwasy call
- componentDidMount(){
-   //makes the DeckStore call the onchange function whenever it cnanges.
-   //This is why we had to use bind
-   DeckStore.listen(this.onChange);
-   //As soon as it is poling for data get data
-   DeckActions.getDecks();
- }
+  componentWillMount() {
+    this.context.onSetTitle(title);
+  }
 
- componentWillUnmount(){
-   //remove event listener
-   DeckStore.unlisten(this.onChange);
- }
+  componentDidMount() {
+    DeckStore.listen(this.onChange);
+    DeckActions.getAllDecks();
+  }
 
- //simply sets the state whenever the Deck store changes
- onChange(state){
-   this.setState(state);
-   console.log(this.getState)
- }
+  componentWillUnmount() {
+    DeckStore.unlisten(this.onChange);
+  }
+
+  onChange(state) {
+    this.setState(state);
+  }
+
+  modifySearch(key, value) {
+    const query = this.state.queryOptions;
+    if (key === 'keywords') {
+      // Always return an array
+      const keywords = value.match(/\w+/g);
+      console.log(keywords);
+      query.keywords = keywords;
+    } else {
+      query[key] = value;
+    }
+    if (!value) {
+      delete query[key];
+    }
+    this.setState({ queryOptions: query });
+    DeckActions.getAllDecks(query);
+  }
+
+  render() {
+    return (
+      <div className={s.root}>
+        <div className={s.container}>
+          <Grid>
+            <Row>
+              <Col xs={6}>
+              <h2>Deck Search</h2><Loader loaded={this.state.decksLoaded} />
+              <br />
+              <h4>Search By Name:</h4>
+              <SearchBar placeholder="name"
+                onSearch={this.modifySearch.bind(this,'name')} />
+              <br />
+
+              <h4>Search By Owner:</h4>
+              <SearchBar placeholder="username"
+                onSearch={this.modifySearch.bind(this,'owner')} />
+              <br />
+
+              <h4>Search By KeyWords:</h4>
+              <SearchBar placeholder="keyword1, keyword2"
+                onSearch={this.modifySearch.bind(this,'keywords')} />
+              <br />
+
+              <h4>Search By Global ID:</h4>
+              <SearchBar placeholder="username:did"
+                onSearch={this.modifySearch.bind(this,'gid')} />
+              <br />
+
+              <h4>Search By Deck ID:</h4>
+              <SearchBar placeholder="did"
+                onSearch={this.modifySearch.bind(this,'did')} />
+              <br />
+
+              <h4>Search By Card ID:</h4>
+              <SearchBar placeholder="username:did:cid"
+                onSearch={this.modifySearch.bind(this,'cid')} />
+              <br />
+
+              </Col>
+              <Col xs={6}><DeckList decks={this.state.decks} /></Col>
+            </Row>
+          </Grid>
 
 
- render() {
-   let Decks = this.state.decks.map((Deck) =>{
-     return (
-       <li key={Deck.id}>
-         <a href={'/Deck/'+Deck.id} onClick={Link.handleClick}>{Deck.name}</a>
-         <p>{Deck.description}</p>
-       </li>
-     )
-   });
-   //Render component
-   return (
-     <div className={s.root}> //Sets the root class
-       <div className={s.container}> //sets the container style
-         <h1>{title}</h1> //one way databinding
-         //for loop to draw all of the Decks
-         {Decks}
-         <p>Try to complete the aboe Decks</p>
-       </div>
-     </div>
-   );
- }
+          <br />
+
+        </div>
+      </div>
+    );
+  }
 
 }
 
