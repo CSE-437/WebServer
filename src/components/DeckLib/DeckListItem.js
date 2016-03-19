@@ -24,7 +24,7 @@ class DeckListItem extends Component {
     this.setState({ showModal: true });
   }
   render() {
-    const deck = this.props.deck
+    const deck = this.props.deck;
     const userUrl = `/users/${deck.owner}`;
     const deckUrl = `/decks/${deck.gid}`;
     const title = (
@@ -58,7 +58,11 @@ class DeckListItem extends Component {
       <Modal.Title>Paste this link into AnkiHub addon</Modal.Title>
       </Modal.Header>
       <Modal.Body>
+<<<<<<< HEAD
       <Input type="text" value={`${location.origin}/api/decks/${deck.gid}`} />
+=======
+      <Input type="text" value={`${location.origin}/decks/${deck.gid}`} />
+>>>>>>> master
       </Modal.Body>
       </Modal>
       </div>
