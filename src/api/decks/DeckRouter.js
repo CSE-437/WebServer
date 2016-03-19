@@ -67,14 +67,22 @@ router.post('/', async (req, res) => {
 
       newDeck.save(newDeckBody, {
         success: (deck) => {
+          console.log('here2')
           const userQuery = new Parse.Query(Parse.User);
-          userQuery.equalTo('username', req.session.user.username);
+          userQuery.equalTo('username', req.session.username);
           userQuery.find({
             success: (user) => {
+              console.log('here3')
+              if(!user.get('decks')){
+                user.set('decks', []);
+              }
               user.add('decks', deck);
+              console.log('here4')
               user.save();
             },
           });
+          console.log('here5')
+
           // Set Ownership of Deck
           const t = new Parse.Object('Transaction');
           t.set('on', req.session.username);
@@ -86,7 +94,8 @@ router.post('/', async (req, res) => {
           t.set('data', { gid });
           t.save(null, {
             success: () => res.status(200).json(deck.toJSON()),
-            error: (err) => res.status(400).json({ error: err, deck: deck.toJSON() })
+            error: (err) => res.status(400).json({ error: err, deck: deck.toJSON() }),
+            sessionToken: req.session.sessionToken,
           });
         },
         error: (deck, error) => res.status(400).json({ error, deck: deck.toJSON() }),
