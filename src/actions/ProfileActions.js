@@ -36,6 +36,7 @@ class ProfileActions {
       })
       .fail((data) => {
         self.logInFail(data);
+        console.log('failed to login');
       });
   }
 
@@ -52,6 +53,9 @@ class ProfileActions {
 
   getMyDecks(username) {
     const self = this;
+    if (!username) {
+      return self.getMyDecksFail({ error: "Not Logged In " });
+    }
     $.get(`/api/decks?${username}`)
       .done((data) => {
         self.getMyDecksSuccess(data);

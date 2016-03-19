@@ -5,10 +5,11 @@ import toastr from 'toastr';
 class ProfileStore {
   constructor() {
     this.bindActions(ProfileActions);
+    console.log(ProfileActions);
     this.bindListeners({
       handleSignUp: ProfileActions.signUpSuccess,
       handleLogIn: ProfileActions.logInSuccess,
-      loginFail: ProfileActions.logInFail,
+      handleLogInFail: ProfileActions.logInFail,
     });
     this.state = {
       decks: [],
@@ -28,7 +29,15 @@ class ProfileStore {
   onLogOutSuccess() {
     this.setState({
       user: {},
+      decks: [],
       loggedIn: false,
+    });
+  }
+  handleLogInFail(error){
+    this.setState({
+      loggedIn: false,
+      decks: [],
+      user: {},
     });
   }
   handleSignUp(user) {
@@ -44,9 +53,6 @@ class ProfileStore {
       loggedIn: true,
     });
     ProfileActions.getMyDecks(user.username);
-  }
-  loginFail(err) {
-    toastr.error(err);
   }
 }
 

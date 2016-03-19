@@ -66,13 +66,12 @@ class ProfilePage extends Component {
 
   render() {
     console.log(this.state)
-    return (
-      <div className="ProfilePage">
-        <h3>Welcome {this.state.user.username}</h3>
-        <span>Here are your decks</span>
-        <DeckList decks={this.state.decks}/>
-      </div>
-    );
+    const page = (this.state.loggedIn)? (<div className="ProfilePage">
+      <h3>Welcome {this.state.user.username}</h3>
+      <span>Here are your decks</span>
+      <DeckList decks={this.state.decks}/>
+    </div>) : (<h3>Please Login</h3>);
+    return page;
   }
 }
 
