@@ -23,11 +23,9 @@ class DeckActions {
     const self = this;
     const optionsString = (options && !($.isEmptyObject(options))) ? `?${$.param(options, true)}` : '';
     const queryString = `/api/decks${optionsString}`;
-    console.log(queryString);
     self.reloadDecks();
     $.get(queryString)
     .done((data) => {
-      console.log(data)
       self.getAllDecksSuccess(data);
     })
     .fail((data) => {

@@ -20,6 +20,7 @@ import RegisterPage from './components/RegisterPage';
 import NotFoundPage from './components/NotFoundPage';
 import ErrorPage from './components/ErrorPage';
 import ProfilePage from './components/ProfilePage';
+import SingleDeckPage from './components/SingleDeckPage';
 /*
 Use a router from react-routing project.
 https://github.com/kriasoft/react-routing
@@ -49,7 +50,14 @@ const router = new Router(on => {
   on('/register', async () => <RegisterPage />);
   // show register page.
   on('/decks', async () => <DeckPage />);
-  // show todo page
+  // show single deck page
+  on('/decks/:gid', async (state) => {
+   const response = await fetch(`/api/decks/${state.params.gid}`);
+   const content = await response.json();
+   console.log(content)
+   return (response.status < 400) ? <SingleDeckPage deck={content[0]} /> : undefined;
+ });
+  // show profile page
   on('/Profile', async() => <ProfilePage />);
   //
 

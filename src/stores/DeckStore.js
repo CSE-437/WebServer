@@ -14,7 +14,7 @@ class DeckStore {
     this.setState({ decksLoaded: false });
   }
   onGetAllDecksSuccess(data) {
-    console.log(" Got Decks ");
+    // console.log(" Got Decks ");
     this.setState({ decksLoaded: true, decks: data });
   }
   onGetAllDecksFail(data) {

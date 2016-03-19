@@ -5,7 +5,7 @@ import toastr from 'toastr';
 class ProfileStore {
   constructor() {
     this.bindActions(ProfileActions);
-    console.log(ProfileActions);
+    // .log(ProfileActions);
     this.bindListeners({
       handleSignUp: ProfileActions.signUpSuccess,
       handleLogIn: ProfileActions.logInSuccess,

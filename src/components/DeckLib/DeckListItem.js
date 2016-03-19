@@ -26,7 +26,7 @@ class DeckListItem extends Component {
   render() {
     const deck = this.props.deck
     const userUrl = `/users/${deck.owner}`;
-    const deckUrl = `/deck/${deck.gid}`;
+    const deckUrl = `/decks/${deck.gid}`;
     const title = (
       <h4><Glyphicon glyph="align-justify"/>
       {' '}
@@ -58,7 +58,7 @@ class DeckListItem extends Component {
       <Modal.Title>Paste this link into AnkiHub addon</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-      <Input type="text" value={`${location.origin}/decks/${deck.gid}`} />
+      <Input type="text" value={`${location.origin}/api/decks/${deck.gid}`} />
       </Modal.Body>
       </Modal>
       </div>

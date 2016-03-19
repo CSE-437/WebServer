@@ -17,7 +17,6 @@ class Footer extends Component {
 
   render() {
     const cx = classNames([s.root, 'footer', 'navbar-fixed-bottom']);
-    console.log(cx)
     return (
       <footer className={cx}>
         sexy footer

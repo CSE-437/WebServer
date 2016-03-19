@@ -75,8 +75,19 @@ router.post('/', async (req, res) => {
               user.save();
             },
           });
-
-          return res.status(200).json(deck.toJSON());
+          // Set Ownership of Deck
+          const t = new Parse.Object('Transaction');
+          t.set('on', req.session.username);
+          t.set('for', 'User');
+          t.set('owner', req.session.username);
+          t.set('indexGroup', randomstring(30));
+          t.set('index', 0);
+          t.set('query', 'aDECK');
+          t.set('data', { gid });
+          t.save(null, {
+            success: () => res.status(200).json(deck.toJSON()),
+            error: (err) => res.status(400).json({ error: err, deck: deck.toJSON() })
+          });
         },
         error: (deck, error) => res.status(400).json({ error, deck: deck.toJSON() }),
         sessionToken: req.session.sessionToken,
