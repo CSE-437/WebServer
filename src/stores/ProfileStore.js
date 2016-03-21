@@ -10,6 +10,7 @@ class ProfileStore {
       handleSignUp: ProfileActions.signUpSuccess,
       handleLogIn: ProfileActions.logInSuccess,
       handleLogInFail: ProfileActions.logInFail,
+      onGetMyDecksSuccess: ProfileActions.getMyDecksSuccess,
     });
     this.state = {
       decks: [],
@@ -21,6 +22,7 @@ class ProfileStore {
   DECK FUNCTIONS
   ***********************/
   onGetMyDecksSuccess(decks) {
+    console.log('hello', decks);
     this.setState({ decks });
   }
   /* *********************
@@ -40,19 +42,31 @@ class ProfileStore {
       user: {},
     });
   }
-  handleSignUp(user) {
+  handleSignUp(data) {
+    console.log('here')
+    var user = data.user;
+    if(data.error){
+      toastr.error(data.error);
+      return;
+    }
     this.setState({
       user,
       loggedIn: true,
     });
-    ProfileActions.getMyDecks(user.username);
+    //ProfileActions.getMyDecks(user.username);
   }
-  handleLogIn(user) {
+  handleLogIn(data) {
+    console.log('here2')
+    var user = data.user;
+    if(data.error){
+      toastr.error(data.error);
+      return;
+    }
     this.setState({
       user,
       loggedIn: true,
     });
-    ProfileActions.getMyDecks(user.username);
+    //ProfileActions.getMyDecks(user.username);
   }
 }
 

@@ -64,7 +64,7 @@ router.post('/', async (req, res) => {
       newDeck.set('gid', gid);
       newDeck.set('did', did);
       newDeck.set('owner', req.session.username);
-      console.log('here1.5');
+      console.log('here1.5', req.session.username);
       newDeck.save(null, {
         success: (deck) => {
           console.log('here2')

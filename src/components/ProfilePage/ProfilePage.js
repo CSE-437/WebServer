@@ -50,7 +50,8 @@ class ProfilePage extends Component {
     // makes the DeckStore call the onchange function whenever it cnanges.
     // This is why we had to use bind
     ProfileStore.listen(this.onChange);
-    ProfileActions.getMyDecks();
+    console.log('here');
+    ProfileActions.getMyDecks(this.state.user.username);
     // As soon as it is poling for data get data
   }
 
