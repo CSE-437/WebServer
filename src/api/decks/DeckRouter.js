@@ -58,14 +58,14 @@ router.post('/', async (req, res) => {
       }
       // TODO : Validate Decks
       const newDeck = new Parse.Object('Deck');
-      const newDeckBody = req.body;
+      Object.keys(req.body).forEach((key) => newDeck.set(key, req.body[key]));
       const gid = req.body.gid || `${req.session.username}:${req.body.did}`;
       const did = gid.split(':')[1];
-      newDeckBody.gid = gid;
-      newDeckBody.did = did;
-      newDeckBody.owner = req.session.username;
-
-      newDeck.save(newDeckBody, {
+      newDeck.set('gid', gid);
+      newDeck.set('did', did);
+      newDeck.set('owner', req.session.username);
+      console.log('here1.5');
+      newDeck.save(null, {
         success: (deck) => {
           console.log('here2')
           const userQuery = new Parse.Query(Parse.User);
