@@ -68,7 +68,7 @@ router.post('/login', async (req,res,next) => {
             req.session.sessionToken = user.toJSON().sessionToken;
             req.session.username = user.toJSON().username;
             req.user = user
-            res.status(200).send(user.toJSON());
+            res.status(200).send({ error, user: user.toJSON() });
           });
         },
         error: function(user, error){
