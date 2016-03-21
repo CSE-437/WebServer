@@ -44,7 +44,7 @@ class ProfileStore {
   }
   handleSignUp(data) {
     console.log('here')
-    var user = data.user;
+    var user = data.user || data;
     if(data.error){
       toastr.error(data.error);
       return;
@@ -57,7 +57,7 @@ class ProfileStore {
   }
   handleLogIn(data) {
     console.log('here2')
-    var user = data.user;
+    var user = data.user || data;
     if(data.error){
       toastr.error(data.error);
       return;
