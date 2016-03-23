@@ -65,6 +65,16 @@ router.post('/', async (req, res) => {
       newDeck.set('did', did);
       newDeck.set('owner', req.session.username);
       console.log('here1.5', req.session.username);
+//      Parse.User.logIn('aarthi', 'password', {
+//        success: function(user) {
+//            console.log('success login', req.user);
+//        },
+//        error: function(user, error) {
+//            console.log("error");
+//            console.log(user + error);
+//        }
+//      });
+      console.log('request is', Parse.User.current());
       newDeck.save(null, {
         success: (deck) => {
           console.log('here2')
