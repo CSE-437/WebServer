@@ -23,6 +23,13 @@ class DeckListItem extends Component {
   open() {
     this.setState({ showModal: true });
   }
+
+  subscribe() {
+    DeckActions.postTransactions(this.props.deck.gid, [{query: 'aSUBSCRIBER', data: {gid: this.props.deck.gid}}]);
+    alert("You're subscribed!");
+  }
+
+
   render() {
     const deck = this.props.deck;
     const userUrl = `/users/${deck.owner}`;
@@ -48,6 +55,7 @@ class DeckListItem extends Component {
       <div>
       <Panel header={title}>
       <blockquote>Description: {deck.description}</blockquote>
+      <Button onClick={this.subscribe.bind(this)}>Subscribe</Button><br />
       <Button onClick={this.open.bind(this)}>Get Link</Button><br />
       {keywords}<br />
       {subscribers}<br />
@@ -61,6 +69,7 @@ class DeckListItem extends Component {
       <Input type="text" value={`${location.origin}/api/decks/${deck.gid}`} />
       </Modal.Body>
       </Modal>
+
       </div>
     );
   }

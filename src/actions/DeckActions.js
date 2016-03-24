@@ -52,9 +52,10 @@ class DeckActions {
       self.getDeckFail(data)
     });
   }
-  postTransactions(did, transactions){
-    var self = this;
-    $.post(`/api/decks/${did}`, transactions)
+  postTransactions(gid, transactions) {
+    console.log(arguments);
+    const self = this;
+    $.post(`/api/decks/${gid}`, transactions)
     .done((data)=>{
       self.postTransactionsSuccess(data)
     })
