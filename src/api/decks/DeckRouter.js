@@ -136,8 +136,9 @@ router.get('/:gid', async (req, res) => {
 
 router.post('/:gid', async (req, res) => {
   const indexGroup = randomstring(30);
+  console.log(req.body);
   if (!req.body.isArray && !(req.body.length > 0)) {
-    return res.status(400).json({ error: 'Must send array of transactions' });
+    return res.status(400).json({ error: `Must send array of transactions ${!req.body.isArray} }, ${req.body.length}`});
   }
   const transactions = req.body.map((body, index) => {
     const t = new Parse.Object('Transaction');
