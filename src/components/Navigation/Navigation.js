@@ -30,12 +30,14 @@ class Navigation extends Component {
   constructor(props) {
     super(props);
     this.state = objectAssign(ProfileStore.getState(),
-      { showModal: false });
+      { showModal: false, showRegisterModal: false});
     // need to use bind so that the this variable for onChange
     // refers to this DeckPage object not the function
     this.onChange = this.onChange.bind(this);
     this.openLogInModal = this.openLogInModal.bind(this);
     this.closeLogInModal = this.closeLogInModal.bind(this);
+    this.openRegisterModal = this.openRegisterModal.bind(this);
+    this.closeRegisterModal = this.closeRegisterModal.bind(this);
   }
 
   componentDidMount() {
@@ -56,6 +58,8 @@ class Navigation extends Component {
   closeLogInModal() {
     this.setState({ showModal: false });
   }
+
+
   logIn(event) {
     event.preventDefault();
     const username = event.target[0].value;
@@ -68,6 +72,24 @@ class Navigation extends Component {
     ProfileActions.logOut();
   }
 
+
+  openRegisterModal() {
+    console.log('register');
+    this.setState({showRegisterModal: true});
+  }
+  closeRegisterModal() {
+    this.setState({showRegisterModal: false});
+  }
+
+  register(event) {
+    event.preventDefault();
+    const username = event.target[0].value;
+    const email = event.target[1].value;
+    const password = event.target[2].value;
+    ProfileActions.signup({ username, email, password });
+    this.closeRegisterModal();
+  }
+
   onChange(state) {
     console.log("new state");
     this.setState(state)
@@ -75,8 +97,9 @@ class Navigation extends Component {
 
   render() {
     const LogInModalButton = (!this.state.loggedIn)?
-      <NavItem onClick = {this.openLogInModal}>Log In</NavItem>:
-      <NavItem onClick = {this.logOut}>Log Out</NavItem>
+      <NavItem onClick = {this.openLogInModal}>Log In</NavItem>:<NavItem onClick = {this.logOut}>Log Out</NavItem>
+
+    const RegisterModalButton = <NavItem onClick = {this.openRegisterModal}>Register</NavItem>
 
     return (
       <Navbar inverse>
@@ -93,6 +116,7 @@ class Navigation extends Component {
           </Nav>
           <Nav pullRight>
             {LogInModalButton}
+            {RegisterModalButton}
             <NavItem href="/profile" onClick={Link.handleClick}>Profile</NavItem>
             <NavItem href="/decks" onClick={Link.handleClick}>Decks</NavItem>
           </Nav>
@@ -111,6 +135,23 @@ class Navigation extends Component {
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.closeLogInModal}>Close</Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal show={this.state.showRegisterModal} onHide = { this.closeRegisterModal }>
+          <Modal.Header closeButton>
+            <Modal.Title id="contained-modal-title-lg">Register for AnkiHub</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+          <form onSubmit={ this.register.bind(this) }>
+            <Input type="text" label="Username" placeholder="Username" ref="usernameField" value={this.state.username} />
+            <Input type="text" label="Email" placeholder="Email" ref="emailField" value={this.state.email} />
+            <Input type="password" label="Password" ref="passwordField" />
+            <ButtonInput type="submit" value="Register" />
+          </form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.closeRegisterModal}>Close</Button>
           </Modal.Footer>
         </Modal>
       </Navbar>
