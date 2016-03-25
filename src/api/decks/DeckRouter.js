@@ -12,29 +12,43 @@ import TransactionObject from '../transactions/TransactionModel';
 const router = new Router();
 
 router.get('/', async (req, res) => {
-
+  console.log('here 1')
   req.session.sessionToken = req.session.sessionToken || req.body.sessionToken;
   const query = new Parse.Query(DeckObject);
+  console.log('here 2')
   if (req.query.keywords) {
     console.log(req.query.keywords);
     query.containsAll('keywords', [].concat(req.query.keywords));
-  }
-  if (req.query.name) {
+    console.log('here 3')
+    }
+    console.log('here 4')
+    if (req.query.name) {
     query.equalTo('name', req.query.name);
-  }
-  if (req.query.cids) {
+    console.log('here 5')
+    }
+    console.log('here 6')
+    if (req.query.cids) {
     query.containsAll('cids', [].concat(req.query.cids));
-  }
-  if (req.query.owner) {
+    console.log('here 7')
+    }
+    console.log('here 8')
+    if (req.query.owner) {
     query.equalTo('owner', req.query.user);
-  }
-  if (req.query.gid) {
+    console.log('here 9')
+    }
+    console.log('here 10')
+    if (req.query.gid) {
     query.equalTo('gid', req.query.gid);
-  }
-  if (req.query.did) {
+    console.log('here 11')
+    }
+    console.log('here 12')
+    if (req.query.did) {
     query.equalTo('did', req.query.did);
-  }
-  query.limit(req.query.limit || 20);
+    console.log('here 13')
+    }
+    const limit = (req.query.limit)? parseInt(req.query.limit) : 20;
+  query.limit(limit);
+  console.log(req.query);
 
   query.find({
     success: results => res.status(200).json(results.map((d) => d.toJSON())),

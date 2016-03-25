@@ -1,5 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import DeckActions from '../../actions/DeckActions';
+import ProfileActions from '../../actions/ProfileActions';
+import ProfileStore from '../../stores/ProfileStore';
 import DeckStore from '../../stores/DeckStore';
 
 import Link from '../Link';
@@ -25,7 +27,7 @@ class DeckListItem extends Component {
   }
 
   subscribe() {
-    DeckActions.postTransactions(this.props.deck.gid, [{query: 'aSUBSCRIBER', data: {gid: this.props.deck.gid}}]);
+    ProfileActions.postTransactions(ProfileStore.getState().user.username, [{query: 'aSUBSCRIPTION', data: {gid: this.props.deck.gid}}]);
     alert("You're subscribed!");
   }
 
@@ -60,6 +62,8 @@ class DeckListItem extends Component {
       {keywords}<br />
       {subscribers}<br />
       {cards}
+      <hr />
+      { this.props.children }
       </Panel>
       <Modal show={this.state.showModal} onHide={this.close.bind(this)}>
       <Modal.Header closeButton>

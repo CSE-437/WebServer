@@ -13,7 +13,11 @@ class ProfileActions {
       'logOutSuccess',
       'logOutFail',
       'getMyDecksSuccess',
-      'getMyDecksFail'
+      'getMyDecksFail',
+      'postTransactionsSuccess',
+      'postTransactionsFail',
+      'updateUserSuccess',
+      'updateUserFail',
     );
   }
 
@@ -62,6 +66,29 @@ class ProfileActions {
       })
       .fail((data) => {
         self.getMyDecksFail(data);
+      });
+  }
+
+  postTransactions(username, transactions) {
+    const t = { transactions };
+    const self = this;
+    $.post(`/api/users/${username}`, t)
+    .done((data) => {
+      self.postTransactionsSuccess(data)
+    })
+    .fail((data) => {
+      self.postTransactionsFail(data)
+    });
+  }
+
+  updateUser(options) {
+    const self = this;
+    $.get(`/api/users?${$.param(options, true)}`)
+      .done((data) => {
+        self.updateUserSuccess(data[0]);
+      })
+      .fail((data) => {
+        self.updateUserFail(data);
       });
   }
 }

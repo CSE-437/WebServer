@@ -32,6 +32,7 @@ var io = require('socket.io')(server);
 
 const server = global.server = express();
 
+import timeout from 'connect-timeout';
 
 //
 // Register Node.js middleware
@@ -103,6 +104,14 @@ io.sockets.on('connection', function(socket){
     io.sockets.emit('onlineUsers', {onlineUsers: onlineUsers});
   });
 });
+
+//time out
+
+function haltOnTimedout(req, res, next) {
+  if (!req.timedout) next();
+}
+server.use(timeout(600));
+server.use(haltOnTimedout);
 
 //
 // Launch the server
