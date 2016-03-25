@@ -14,7 +14,7 @@ const router = new Router();
 router.use(async (req, res, next) => {
   const user = new Parse.User();
   if (!req.session.sessionToken) {
-    if(!req.body.sessionToken){
+    if(!req.body.sessionToken) {
       return res.status(400).json({error: "Need to send session token "});
     }
     await user.become(req.body.sessionToken);
@@ -112,6 +112,7 @@ router.post('/', async (req, res) => {
           console.log('here5')
 
           // Set Ownership of Deck
+          console.log("here");
           const t = new Parse.Object('Transaction');
           t.set('on', req.session.username || req.user.get('username'));
           t.set('for', 'User');
