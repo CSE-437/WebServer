@@ -11,6 +11,18 @@ import TransactionObject from '../transactions/TransactionModel';
 
 const router = new Router();
 
+router.use(async (req, res, next) => {
+  const user = new Parse.User();
+  if (!req.session.sessionToken) {
+    if(!req.body.sessionToken){
+      return res.status(400).json({error: "Need to send session token "});
+    }
+    await user.become(req.body.sessionToken);
+  }
+  req.user = user;
+  next();
+});
+
 router.get('/', async (req, res) => {
   console.log('here 1');
   const query = new Parse.Query(DeckObject);
@@ -66,7 +78,7 @@ router.post('/', async (req, res) => {
   if (req.body.gid) {
     query.equalTo('gid', req.body.gid);
   } else if (req.body.did) {
-    query.equalTo('gid', `${req.session.username}:${req.body.did}`);
+    query.equalTo('gid', `${req.session.username  || req.user.get('username') }:${req.body.did}`);
   }
   query.find({
     success: (results) => {
@@ -76,16 +88,16 @@ router.post('/', async (req, res) => {
       // TODO : Validate Decks
       const newDeck = new Parse.Object('Deck');
       Object.keys(req.body).forEach((key) => newDeck.set(key, req.body[key]));
-      const gid = req.body.gid || `${req.session.username}:${req.body.did}`;
+      const gid = req.body.gid || `${req.session.username || req.user.get('username')}:${req.body.did}`;
       const did = gid.split(':')[1];
       newDeck.set('gid', gid);
       newDeck.set('did', did);
-      newDeck.set('owner', req.session.username);
+      newDeck.set('owner', req.session.username || req.user.get('username'));
       newDeck.save(null, {
         success: (deck) => {
           console.log('here2')
           const userQuery = new Parse.Query(Parse.User);
-          userQuery.equalTo('username', req.session.username);
+          userQuery.equalTo('username', req.session.username || req.user.get('username'));
           userQuery.find({
             success: (user) => {
               console.log('here3')
@@ -101,9 +113,9 @@ router.post('/', async (req, res) => {
 
           // Set Ownership of Deck
           const t = new Parse.Object('Transaction');
-          t.set('on', req.session.username);
+          t.set('on', req.session.username || req.user.get('username'));
           t.set('for', 'User');
-          t.set('owner', req.session.username);
+          t.set('owner', req.session.username || req.user.get('username'));
           t.set('indexGroup', randomstring(30));
           t.set('index', 0);
           t.set('query', 'aDECK');
@@ -155,7 +167,7 @@ router.post('/:gid', async (req, res) => {
     Object.keys(body).forEach((key) => t.set(key, body[key]));
     t.set('on', req.gid);
     t.set('for', 'Deck');
-    t.set('owner', req.session.username);
+    t.set('owner', req.session.username || req.user.get('username'));
     t.set('indexGroup', indexGroup);
     t.set('index', index);
     return t;
