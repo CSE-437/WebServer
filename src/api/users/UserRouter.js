@@ -2,6 +2,8 @@
 // https://github.com/yortus/asyncawait
 import { Router } from 'express';
 import Parse from 'parse/node';
+import IsArray from '../../core/isArray'
+const randomstring = require('randomstring').generate
 
 const router = new Router();
 
@@ -43,7 +45,7 @@ router.post('/signup', async (req, res) => {
       sessionToken: req.session.sessionToken
     });
   }else{
-    return res.status(400).send({error: {message: 'Need username and password'}});
+    return res.status(400).send({error: {message: 'Need username and password', data: req.body }});
   }
 });
 
@@ -70,7 +72,7 @@ router.post('/login', async (req,res,next) => {
       }
     });
   }else {
-    return res.status(400).json({ error: {msg: 'Need username and password' }});
+    return res.status(400).json({ error: {msg: 'Need username and password' , data: req.body }});
   }
 });
 
@@ -84,7 +86,7 @@ router.param('username', async (req, res, next, username) =>{
 });
 
 router.get('/:username', async (req, res, next) => {
-  var query = new Parse.Query(Parse.User);
+  const query = new Parse.Query(Parse.User);
   query.equalTo('username', req.username);
   query.find({
     success: function(results){
@@ -100,37 +102,31 @@ router.get('/:username', async (req, res, next) => {
 
 //Expects [transactions] TODO deal with Fork
 //TODO make stransaction method
-router.post('/:username', async (req, res, next) =>{
-  var current_id = req.username
-  if (!req.body.isArray && !(req.body.length>0)){
-    return res.status(400).send({err:'Must send array of transactions'})
+router.post('/:username', async (req, res) => {
+  const indexGroup = randomstring(30);
+  console.log("body", req.body);
+  const bodyTransactions = req.body.transactions;
+  console.log("transactions", IsArray(bodyTransactions));
+  if (!IsArray(bodyTransactions) && !(bodyTransactions.length > 0)) {
+    return res.status(400).json({ error: `Must send array of transactions: IsArray: ${bodyTransactions.isArray()}, length: bodyTransactions.length`} );
   }
-  var transactions = req.body.map(function(body){
-    var t = new Parse.Object('Transaction');
-    return TransactionUtil.fromRequestBody(t, body);
+  console.log("here2");
+  const transactions = bodyTransactions.map((body, index) => {
+    const t = new Parse.Object('Transaction');
+    Object.keys(body).forEach((key) => t.set(key, body[key]));
+    t.set('on', req.username);
+    t.set('for', 'User');
+    t.set('owner', req.session.username);
+    t.set('indexGroup', indexGroup);
+    t.set('index', index);
+    return t;
   });
-  var parsedTransactions = []
-  transactions.forEach(function(t){
-    console.log('here5')
-    t.set('on', current_id);
-    t.save(null, {
-      success: function(trans){
-        //TODO maintain order
 
-        parsedTransactions.push({transaction: trans, error: null});
-        if(parsedTransactions.length == transactions.length){
-          res.status(200).send(parsedTransactions)
-        }
-      },
-      error: function(trans, error){
-
-        parsedTransactions.push({transaction: trans, error: error});
-        if(parsedTransactions.length == transactions.length){
-          res.status(400).send(parsedTransactions)
-        }
-      },
-      sessionToken: req.session.sessionToken
-    });
+  Parse.Object.saveAll(transactions, {
+    success: (list) => res.status(200).json(list),
+    error: (error) => res.status(400).json(error),
+    sessionToken: req.session.sessionToken,
   });
+  return null;
 });
 export default router;

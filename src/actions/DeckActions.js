@@ -1,5 +1,4 @@
 import dispatcher from '../core/Dispatcher';
-import {toQueryString} from '../core/misc';
 import toastr from 'toastr';
 import $ from 'jquery'
 
@@ -53,9 +52,9 @@ class DeckActions {
     });
   }
   postTransactions(gid, transactions) {
-    console.log(arguments);
+    const t = { transactions };
     const self = this;
-    $.post(`/api/decks/${gid}`, transactions)
+    $.post(`/api/decks/${gid}`, t)
     .done((data)=>{
       self.postTransactionsSuccess(data)
     })

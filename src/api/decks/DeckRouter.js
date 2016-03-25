@@ -1,6 +1,8 @@
 // Register todos with aws dynammodb.
 // https://github.com/yortus/asyncawait
 import { Router } from 'express';
+import IsArray from '../../core/isArray';
+
 const Parse = require('parse/node');
 const randomstring = require('randomstring').generate;
 
@@ -10,6 +12,8 @@ import TransactionObject from '../transactions/TransactionModel';
 const router = new Router();
 
 router.get('/', async (req, res) => {
+
+  req.session.sessionToken = req.session.sessionToken || req.body.sessionToken;
   const query = new Parse.Query(DeckObject);
   if (req.query.keywords) {
     console.log(req.query.keywords);
@@ -40,7 +44,8 @@ router.get('/', async (req, res) => {
 });
 // Only for posting decks
 router.post('/', async (req, res) => {
-  console.log("here")
+  req.session.sessionToken = req.session.sessionToken || req.body.sessionToken;
+
   const query = new Parse.Query(DeckObject);
   if (!req.body.gid && !req.body.did) {
     return res.status(400).json({ err: 'Must have a did or gid' });
@@ -64,7 +69,7 @@ router.post('/', async (req, res) => {
       newDeck.set('gid', gid);
       newDeck.set('did', did);
       newDeck.set('owner', req.session.username);
-      console.log('here1.5', req.session.username);
+      console.log('here1.5', req.body.sessionToken);
 //      Parse.User.logIn('aarthi', 'password', {
 //        success: function(user) {
 //            console.log('success login', req.user);
@@ -74,7 +79,6 @@ router.post('/', async (req, res) => {
 //            console.log(user + error);
 //        }
 //      });
-      console.log('request is', Parse.User.current());
       newDeck.save(null, {
         success: (deck) => {
           console.log('here2')
@@ -104,16 +108,16 @@ router.post('/', async (req, res) => {
           t.set('data', { gid });
           t.save(null, {
             success: () => res.status(200).json(deck.toJSON()),
-            error: (err) => res.status(400).json({ error: err, deck: deck.toJSON() }),
+            error: (err) => res.status(401).json({ error: err, deck: deck.toJSON() }),
             sessionToken: req.session.sessionToken,
           });
         },
-        error: (deck, error) => res.status(400).json({ error, deck: deck.toJSON() }),
+        error: (deck, error) => res.status(402).json({ error, deck: deck.toJSON() }),
         sessionToken: req.session.sessionToken,
       });
       return null;
     },
-    error: (err) => res.status(500).json({ error: err, deck: {} }),
+    error: (err) => res.status(403).json({ error: err, deck: {} }),
     sessionToken: req.session.sessionToken,
   });
   return null;
@@ -124,6 +128,8 @@ router.param('gid', async (req, res, next, gid) => {
 });
 
 router.get('/:gid', async (req, res) => {
+
+  req.session.sessionToken = req.session.sessionToken || req.body.sessionToken;
   const query = new Parse.Query(DeckObject);
   query.equalTo('gid', req.gid);
   query.find({
@@ -135,12 +141,16 @@ router.get('/:gid', async (req, res) => {
 
 
 router.post('/:gid', async (req, res) => {
+  req.session.sessionToken = req.session.sessionToken || req.body.sessionToken;
   const indexGroup = randomstring(30);
-  console.log(req.body);
-  if (!req.body.isArray && !(req.body.length > 0)) {
-    return res.status(400).json({ error: `Must send array of transactions ${!req.body.isArray} }, ${req.body.length}`});
+  console.log("body", req.body);
+  const bodyTransactions = req.body.transactions;
+  console.log("transactions", IsArray(bodyTransactions));
+  if (!IsArray(bodyTransactions) && !(bodyTransactions.length > 0)) {
+    return res.status(400).json({ error: `Must send array of transactions: IsArray: ${bodyTransactions.isArray()}, length: bodyTransactions.length`} );
   }
-  const transactions = req.body.map((body, index) => {
+  console.log("here2");
+  const transactions = bodyTransactions.map((body, index) => {
     const t = new Parse.Object('Transaction');
     Object.keys(body).forEach((key) => t.set(key, body[key]));
     t.set('on', req.gid);
@@ -160,6 +170,7 @@ router.post('/:gid', async (req, res) => {
 });
 
 router.get('/:gid/transactions', async(req, res) => {
+  req.session.sessionToken = req.session.sessionToken || req.body.sessionToken;
   const query = new Parse.Query(TransactionObject);
   if (req.query.indexGroup) {
     query.equalTo('indexGroup', req.query.indexGroup);

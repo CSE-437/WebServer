@@ -32,7 +32,6 @@ var io = require('socket.io')(server);
 
 const server = global.server = express();
 
-//Configure sessions
 
 //
 // Register Node.js middleware
@@ -50,8 +49,6 @@ server.use(session({
   resave: true,
   saveUninitialized: true
 }));
-
-import UserUtil from './api/users/UserUtil';
 
 server.use(express.static(path.join(__dirname, 'public')));
 
