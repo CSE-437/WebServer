@@ -51,7 +51,7 @@ router.get('/', async (req, res) => {
 
   query.find({
     success: results => res.status(200).json(results.map((d) => d.toJSON())),
-    error: err => res.status(400).json(err),
+    error: (r, err) => res.status(400).json(err),
     sessionToken: req.session.sessionToken || req.body.sessionToken,
   });
 });
@@ -119,7 +119,7 @@ router.post('/', async (req, res) => {
       });
       return null;
     },
-    error: (err) => res.status(403).json({ error: err, deck: {} }),
+    error: (deck, err) => res.status(403).json({ error: err, deck: {} }),
     sessionToken: req.session.sessionToken || req.body.sessionToken,
   });
   return null;
@@ -163,7 +163,7 @@ router.post('/:gid', async (req, res) => {
 
   Parse.Object.saveAll(transactions, {
     success: (list) => res.status(200).json(list),
-    error: (error) => res.status(500).json(error),
+    error: (t, error) => res.status(500).json(error),
     sessionToken: req.session.sessionToken || req.body[0].sessionToken,
   });
   return null;
@@ -182,7 +182,7 @@ router.get('/:gid/transactions', async(req, res) => {
 
   query.find({
     success: (results) => res.status(200).json(results.map((deck) => deck.toJSON())),
-    error: (error) => res.status(500).json(error),
+    error: (r, error) => res.status(500).json(error),
     sessionToken: req.session.sessionToken || req.body.sessionToken,
   });
 });
