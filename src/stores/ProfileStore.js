@@ -4,14 +4,14 @@ import toastr from 'toastr';
 // Remember that ever component gets it's own store
 class ProfileStore {
   constructor() {
-    this.bindActions(ProfileActions);
     // .log(ProfileActions);
     this.bindListeners({
-      handleSignUp: ProfileActions.signUpSuccess,
-      handleLogIn: ProfileActions.logInSuccess,
+      onSignUpSuccess: ProfileActions.signUpSuccess,
+      onLogInSuccess: ProfileActions.logInSuccess,
       handleLogInFail: ProfileActions.logInFail,
       onGetMyDecksSuccess: ProfileActions.getMyDecksSuccess,
     });
+    this.bindActions(ProfileActions);
     this.state = {
       decks: [],
       user: {},
@@ -42,7 +42,7 @@ class ProfileStore {
       user: {},
     });
   }
-  handleSignUp(data) {
+  onSignUpSuccess(data) {
     console.log('here')
     var user = data.user || data;
     if(data.error){
@@ -55,7 +55,7 @@ class ProfileStore {
     });
     //ProfileActions.getMyDecks(user.username);
   }
-  handleLogIn(data) {
+  onLogInSuccess(data) {
     console.log('here2')
     var user = data.user || data;
     if(data.error){
@@ -68,6 +68,17 @@ class ProfileStore {
     });
     //ProfileActions.getMyDecks(user.username);
   }
+
+  onPostTransactionsSuccess(data) {
+    console.log("New Transactions", data);
+    ProfileActions.updateUser({ username: this.state.user.username });
+  }
+
+  onUpdateUserSuccess(user) {
+    var user = user || this.state.user
+    this.setState({ user });
+  }
+
 }
 
 export default dispatcher.createStore(ProfileStore);

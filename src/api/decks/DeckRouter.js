@@ -1,6 +1,8 @@
 // Register todos with aws dynammodb.
 // https://github.com/yortus/asyncawait
 import { Router } from 'express';
+import IsArray from '../../core/isArray';
+
 const Parse = require('parse/node');
 const randomstring = require('randomstring').generate;
 
@@ -9,84 +11,121 @@ import TransactionObject from '../transactions/TransactionModel';
 
 const router = new Router();
 
+router.use(async (req, res, next) => {
+  console.log("session 0", req.username, req.sessionToken)
+  if(req.session && req.session.username && req.session.sessionToken){
+    console.log("session 1")
+    req.username = req.session.username
+    req.sessionToken = req.session.sessionToken;
+    return next();
+  }else if(IsArray(req.body)){
+    const body = req.body[0];
+    if(body && (body.username || body.owner ) && body.sessionToken){
+      console.log("session 2")
+      req.username = body.username || body.owner;
+      req.sessionToken = body.sessionToken;
+      return next();
+    }else{
+      return res.status(400).json({error: " Must send username and sessionToken with the first element of array" });
+    }
+  }else if(req.body && (req.body.username || req.body.owner) && req.body.sessionToken){
+    console.log("session 3")
+    req.username = req.body.owner || req.body.username;
+    console.log("session 3.5");
+    req.sessionToken = req.body.sessionToken;
+    console.log("session 4");
+    return next();
+  }
+  return res.status(400).json({ error: "Must send username and session Token" });
+});
+
 router.get('/', async (req, res) => {
+  console.log('here 1');
   const query = new Parse.Query(DeckObject);
+  console.log('here 2')
   if (req.query.keywords) {
     console.log(req.query.keywords);
     query.containsAll('keywords', [].concat(req.query.keywords));
-  }
-  if (req.query.name) {
+    console.log('here 3')
+    }
+    console.log('here 4')
+    if (req.query.name) {
     query.equalTo('name', req.query.name);
-  }
-  if (req.query.cids) {
+    console.log('here 5')
+    }
+    console.log('here 6')
+    if (req.query.cids) {
     query.containsAll('cids', [].concat(req.query.cids));
-  }
-  if (req.query.owner) {
+    console.log('here 7')
+    }
+    console.log('here 8')
+    if (req.query.owner) {
     query.equalTo('owner', req.query.user);
-  }
-  if (req.query.gid) {
+    console.log('here 9')
+    }
+    console.log('here 10')
+    if (req.query.gid) {
     query.equalTo('gid', req.query.gid);
-  }
-  if (req.query.did) {
+    console.log('here 11')
+    }
+    console.log('here 12')
+    if (req.query.did) {
     query.equalTo('did', req.query.did);
-  }
-  query.limit(req.query.limit || 20);
+    console.log('here 13')
+    }
+    const limit = (req.query.limit)? parseInt(req.query.limit) : 20;
+  query.limit(limit);
+  console.log(req.query);
 
   query.find({
     success: results => res.status(200).json(results.map((d) => d.toJSON())),
-    error: err => res.status(400).json(err),
-    sessionToken: req.session.sessionToken,
+    error: (r, err) => res.status(400).json(err),
+    sessionToken: req.sessionToken,
   });
 });
 // Only for posting decks
 router.post('/', async (req, res) => {
-  console.log("here")
+  console.log("Post Deck 1");
   const query = new Parse.Query(DeckObject);
   if (!req.body.gid && !req.body.did) {
     return res.status(400).json({ err: 'Must have a did or gid' });
   }
+  console.log("Post Deck 2");
 
   if (req.body.gid) {
     query.equalTo('gid', req.body.gid);
   } else if (req.body.did) {
-    query.equalTo('gid', `${req.session.username}:${req.body.did}`);
+    query.equalTo('gid', `${req.username }:${req.body.did}`);
   }
+  console.log("Post Deck 3");
   query.find({
     success: (results) => {
+      console.log("Post Deck 4", results);
       if (results[0]) {
         return res.status(400).json({ error: 'Deck already Exist' });
       }
       // TODO : Validate Decks
+      console.log("Post Deck 5");
       const newDeck = new Parse.Object('Deck');
       Object.keys(req.body).forEach((key) => newDeck.set(key, req.body[key]));
-      const gid = req.body.gid || `${req.session.username}:${req.body.did}`;
+      const gid = req.body.gid || `${req.username}:${req.body.did}`;
       const did = gid.split(':')[1];
       newDeck.set('gid', gid);
       newDeck.set('did', did);
-      newDeck.set('owner', req.session.username);
-      console.log('here1.5', req.session.username);
-//      Parse.User.logIn('aarthi', 'password', {
-//        success: function(user) {
-//            console.log('success login', req.user);
-//        },
-//        error: function(user, error) {
-//            console.log("error");
-//            console.log(user + error);
-//        }
-//      });
-      console.log('request is', Parse.User.current());
+      newDeck.set('owner', req.username);
+      console.log("Post Deck 6");
       newDeck.save(null, {
         success: (deck) => {
           console.log('here2')
           const userQuery = new Parse.Query(Parse.User);
-          userQuery.equalTo('username', req.session.username);
+          userQuery.equalTo('username', req.username);
           userQuery.find({
             success: (user) => {
               console.log('here3')
               if(!user.get('decks')){
                 user.set('decks', []);
               }
-              user.add('decks', deck);
+              user.addUnique('decks', deck);
               console.log('here4')
               user.save();
             },
@@ -94,27 +133,28 @@ router.post('/', async (req, res) => {
           console.log('here5')
 
           // Set Ownership of Deck
+          console.log("here");
           const t = new Parse.Object('Transaction');
-          t.set('on', req.session.username);
+          t.set('on', req.username);
           t.set('for', 'User');
-          t.set('owner', req.session.username);
+          t.set('owner', req.username);
           t.set('indexGroup', randomstring(30));
           t.set('index', 0);
           t.set('query', 'aDECK');
           t.set('data', { gid });
           t.save(null, {
             success: () => res.status(200).json(deck.toJSON()),
-            error: (err) => res.status(400).json({ error: err, deck: deck.toJSON() }),
-            sessionToken: req.session.sessionToken,
+            error: (deck, errr) => res.status(401).json({ error: err, deck: deck.toJSON() }),
+            sessionToken: req.sessionToken,
           });
         },
-        error: (deck, error) => res.status(400).json({ error, deck: deck.toJSON() }),
-        sessionToken: req.session.sessionToken,
+        error: (deck, error) => res.status(402).json({ error, deck: deck.toJSON() }),
+        sessionToken: req.sessionToken,
       });
       return null;
     },
-    error: (err) => res.status(500).json({ error: err, deck: {} }),
-    sessionToken: req.session.sessionToken,
+    error: (deck, err) => res.status(403).json({ error: err, deck: {} }),
+    sessionToken: req.sessionToken,
   });
   return null;
 });
@@ -124,28 +164,32 @@ router.param('gid', async (req, res, next, gid) => {
 });
 
 router.get('/:gid', async (req, res) => {
+
   const query = new Parse.Query(DeckObject);
   query.equalTo('gid', req.gid);
   query.find({
     success: (results) => res.status(200).json(results.map((d) => d.toJSON())),
     error: (deck, error) => res.status(400).json({ error, deck: deck.toJSON(deck) }),
-    sessionToken: req.session.sessionToken,
+    sessionToken: req.sessionToken,
   });
 });
 
 
 router.post('/:gid', async (req, res) => {
   const indexGroup = randomstring(30);
-  console.log(req.body);
-  if (!req.body.isArray && !(req.body.length > 0)) {
-    return res.status(400).json({ error: `Must send array of transactions ${!req.body.isArray} }, ${req.body.length}`});
+  console.log("body", req.body);
+  const bodyTransactions = req.body.transactions;
+  console.log("transactions", IsArray(bodyTransactions));
+  if (!IsArray(bodyTransactions) && !(bodyTransactions.length > 0)) {
+    return res.status(400).json({ error: `Must send array of transactions: IsArray: ${bodyTransactions.isArray()}, length: bodyTransactions.length`} );
   }
-  const transactions = req.body.map((body, index) => {
+  console.log("here2");
+  const transactions = bodyTransactions.map((body, index) => {
     const t = new Parse.Object('Transaction');
     Object.keys(body).forEach((key) => t.set(key, body[key]));
     t.set('on', req.gid);
     t.set('for', 'Deck');
-    t.set('owner', req.session.username);
+    t.set('owner', req.username);
     t.set('indexGroup', indexGroup);
     t.set('index', index);
     return t;
@@ -153,8 +197,8 @@ router.post('/:gid', async (req, res) => {
 
   Parse.Object.saveAll(transactions, {
     success: (list) => res.status(200).json(list),
-    error: (error) => res.status(500).json(error),
-    sessionToken: req.session.sessionToken,
+    error: (t, error) => res.status(500).json(error),
+    sessionToken: req.session.sessionToken || req.body[0].sessionToken,
   });
   return null;
 });
@@ -172,8 +216,8 @@ router.get('/:gid/transactions', async(req, res) => {
 
   query.find({
     success: (results) => res.status(200).json(results.map((deck) => deck.toJSON())),
-    error: (error) => res.status(500).json(error),
-    sessionToken: req.session.sessionToken,
+    error: (r, error) => res.status(500).json(error),
+    sessionToken: req.sessionToken,
   });
 });
 

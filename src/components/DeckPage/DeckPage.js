@@ -3,13 +3,15 @@ import withStyles from '../../decorators/withStyles'; // Applies custmo style
 import s from './DeckPage.scss'; // Import custom styles
 import DeckStore from '../../stores/DeckStore';
 import DeckActions from '../../actions/DeckActions';
+import ProfileActions from '../../actions/ProfileActions';
+import ProfileStore from '../../stores/ProfileStore';
 import Link from '../Link'
 const objectAssign = require('object-assign');
 
 import Loader from 'react-loader';
 import { Button } from 'react-bootstrap';
 import { Grid, Row, Col } from 'react-bootstrap';
-import DeckList from '../DeckLib/DeckList';
+import DeckList, { DeckListAction } from '../DeckLib/DeckList';
 import SearchBar from '../misc/SearchBar';
 
 const title = 'Find Decks';
@@ -39,6 +41,11 @@ class DeckPage extends Component {
 
   componentWillUnmount() {
     DeckStore.unlisten(this.onChange);
+  }
+
+  subscribe(index, deck) {
+    alert(`subscribed, ${index}, ${deck.gid}`);
+    ProfileActions.postTransactions(ProfileStore.getState().user.username, [{query: 'aSUBSCRIPTION', data: {gid: deck.gid}}]);
   }
 
   onChange(state) {
@@ -102,7 +109,7 @@ class DeckPage extends Component {
               <br />
 
               </Col>
-              <Col xs={6}><DeckList decks={this.state.decks} /></Col>
+              <Col xs={6}><DeckList decks={this.state.decks} actions={[new DeckListAction("Subscribe", this.subscribe)]} /></Col>
             </Row>
           </Grid>
 
