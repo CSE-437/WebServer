@@ -12,15 +12,31 @@ import TransactionObject from '../transactions/TransactionModel';
 const router = new Router();
 
 router.use(async (req, res, next) => {
-  const user = new Parse.User();
-  if (!req.session.sessionToken) {
-    if(!req.body.sessionToken) {
-      return res.status(400).json({error: "Need to send session token "});
+  console.log("session 0", req.username, req.sessionToken)
+  if(req.session && req.session.username && req.session.sessionToken){
+    console.log("session 1")
+    req.username = req.session.username
+    req.sessionToken = req.session.sessionToken;
+    return next();
+  }else if(IsArray(req.body)){
+    const body = req.body[0];
+    if(body && (body.username || body.owner ) && body.sessionToken){
+      console.log("session 2")
+      req.username = body.username || body.owner;
+      req.sessionToken = body.sessionToken;
+      return next();
+    }else{
+      return res.status(400).json({error: " Must send username and sessionToken with the first element of array" });
     }
-    await user.become(req.body.sessionToken);
+  }else if(req.body && (req.body.username || req.body.owner) && req.body.sessionToken){
+    console.log("session 3")
+    req.username = req.body.owner || req.body.username;
+    console.log("session 3.5");
+    req.sessionToken = req.body.sessionToken;
+    console.log("session 4");
+    return next();
   }
-  req.user = user;
-  next();
+  return res.status(400).json({ error: "Must send username and session Token" });
 });
 
 router.get('/', async (req, res) => {
@@ -64,47 +80,52 @@ router.get('/', async (req, res) => {
   query.find({
     success: results => res.status(200).json(results.map((d) => d.toJSON())),
     error: (r, err) => res.status(400).json(err),
-    sessionToken: req.session.sessionToken || req.body.sessionToken,
+    sessionToken: req.sessionToken,
   });
 });
 // Only for posting decks
 router.post('/', async (req, res) => {
-
+  console.log("Post Deck 1");
   const query = new Parse.Query(DeckObject);
   if (!req.body.gid && !req.body.did) {
     return res.status(400).json({ err: 'Must have a did or gid' });
   }
+  console.log("Post Deck 2");
 
   if (req.body.gid) {
     query.equalTo('gid', req.body.gid);
   } else if (req.body.did) {
-    query.equalTo('gid', `${req.session.username  || req.user.get('username') }:${req.body.did}`);
+    query.equalTo('gid', `${req.username }:${req.body.did}`);
   }
+  console.log("Post Deck 3");
   query.find({
     success: (results) => {
+      console.log("Post Deck 4", results);
       if (results[0]) {
         return res.status(400).json({ error: 'Deck already Exist' });
       }
       // TODO : Validate Decks
+      console.log("Post Deck 5");
       const newDeck = new Parse.Object('Deck');
       Object.keys(req.body).forEach((key) => newDeck.set(key, req.body[key]));
-      const gid = req.body.gid || `${req.session.username || req.user.get('username')}:${req.body.did}`;
+      const gid = req.body.gid || `${req.username}:${req.body.did}`;
       const did = gid.split(':')[1];
       newDeck.set('gid', gid);
       newDeck.set('did', did);
-      newDeck.set('owner', req.session.username || req.user.get('username'));
+      newDeck.set('owner', req.username);
+      console.log("Post Deck 6");
       newDeck.save(null, {
         success: (deck) => {
           console.log('here2')
           const userQuery = new Parse.Query(Parse.User);
-          userQuery.equalTo('username', req.session.username || req.user.get('username'));
+          userQuery.equalTo('username', req.username);
           userQuery.find({
             success: (user) => {
               console.log('here3')
               if(!user.get('decks')){
                 user.set('decks', []);
               }
-              user.add('decks', deck);
+              user.addUnique('decks', deck);
               console.log('here4')
               user.save();
             },
@@ -114,9 +135,9 @@ router.post('/', async (req, res) => {
           // Set Ownership of Deck
           console.log("here");
           const t = new Parse.Object('Transaction');
-          t.set('on', req.session.username || req.user.get('username'));
+          t.set('on', req.username);
           t.set('for', 'User');
-          t.set('owner', req.session.username || req.user.get('username'));
+          t.set('owner', req.username);
           t.set('indexGroup', randomstring(30));
           t.set('index', 0);
           t.set('query', 'aDECK');
@@ -124,16 +145,16 @@ router.post('/', async (req, res) => {
           t.save(null, {
             success: () => res.status(200).json(deck.toJSON()),
             error: (deck, errr) => res.status(401).json({ error: err, deck: deck.toJSON() }),
-            sessionToken: req.session.sessionToken || req.body.sessionToken,
+            sessionToken: req.sessionToken,
           });
         },
         error: (deck, error) => res.status(402).json({ error, deck: deck.toJSON() }),
-        sessionToken: req.session.sessionToken || req.body.sessionToken,
+        sessionToken: req.sessionToken,
       });
       return null;
     },
     error: (deck, err) => res.status(403).json({ error: err, deck: {} }),
-    sessionToken: req.session.sessionToken || req.body.sessionToken,
+    sessionToken: req.sessionToken,
   });
   return null;
 });
@@ -149,7 +170,7 @@ router.get('/:gid', async (req, res) => {
   query.find({
     success: (results) => res.status(200).json(results.map((d) => d.toJSON())),
     error: (deck, error) => res.status(400).json({ error, deck: deck.toJSON(deck) }),
-    sessionToken: req.session.sessionToken || req.body.sessionToken,
+    sessionToken: req.sessionToken,
   });
 });
 
@@ -168,7 +189,7 @@ router.post('/:gid', async (req, res) => {
     Object.keys(body).forEach((key) => t.set(key, body[key]));
     t.set('on', req.gid);
     t.set('for', 'Deck');
-    t.set('owner', req.session.username || req.user.get('username'));
+    t.set('owner', req.username);
     t.set('indexGroup', indexGroup);
     t.set('index', index);
     return t;
@@ -196,7 +217,7 @@ router.get('/:gid/transactions', async(req, res) => {
   query.find({
     success: (results) => res.status(200).json(results.map((deck) => deck.toJSON())),
     error: (r, error) => res.status(500).json(error),
-    sessionToken: req.session.sessionToken || req.body.sessionToken,
+    sessionToken: req.sessionToken,
   });
 });
 

@@ -105,14 +105,6 @@ io.sockets.on('connection', function(socket){
   });
 });
 
-//time out
-
-function haltOnTimedout(req, res, next) {
-  if (!req.timedout) next();
-}
-server.use(timeout(600));
-server.use(haltOnTimedout);
-
 //
 // Launch the server
 // -----------------------------------------------------------------------------
