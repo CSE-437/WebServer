@@ -47,7 +47,7 @@ class Navigation extends Component {
     ProfileStore.listen(this.onChange);
     $.notify({
 	title: "Welcome:",
-	message: "This plugin has been provided to you by Robert McIntosh aka mouse0270"
+	message: "src\components\Navigation\Navigation.js to change this"
 });
     // As soon as it is poling for data get data
   }
