@@ -21,7 +21,7 @@ class Header extends Component {
             <div className={s.root}>
             <div className={s.container}>
             <Navigation >
-              <span>sexy header omg!!! check out the nav bar under me</span>
+              <span> </span>
             </Navigation>
             </div>
             </div>
