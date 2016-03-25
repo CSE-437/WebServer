@@ -12,8 +12,7 @@ import TransactionObject from '../transactions/TransactionModel';
 const router = new Router();
 
 router.get('/', async (req, res) => {
-  console.log('here 1')
-  req.session.sessionToken = req.session.sessionToken || req.body.sessionToken;
+  console.log('here 1');
   const query = new Parse.Query(DeckObject);
   console.log('here 2')
   if (req.query.keywords) {
@@ -53,12 +52,11 @@ router.get('/', async (req, res) => {
   query.find({
     success: results => res.status(200).json(results.map((d) => d.toJSON())),
     error: err => res.status(400).json(err),
-    sessionToken: req.session.sessionToken,
+    sessionToken: req.session.sessionToken || req.body.sessionToken,
   });
 });
 // Only for posting decks
 router.post('/', async (req, res) => {
-  req.session.sessionToken = req.session.sessionToken || req.body.sessionToken;
 
   const query = new Parse.Query(DeckObject);
   if (!req.body.gid && !req.body.did) {
@@ -83,16 +81,6 @@ router.post('/', async (req, res) => {
       newDeck.set('gid', gid);
       newDeck.set('did', did);
       newDeck.set('owner', req.session.username);
-      console.log('here1.5', req.body.sessionToken);
-//      Parse.User.logIn('aarthi', 'password', {
-//        success: function(user) {
-//            console.log('success login', req.user);
-//        },
-//        error: function(user, error) {
-//            console.log("error");
-//            console.log(user + error);
-//        }
-//      });
       newDeck.save(null, {
         success: (deck) => {
           console.log('here2')
@@ -123,16 +111,16 @@ router.post('/', async (req, res) => {
           t.save(null, {
             success: () => res.status(200).json(deck.toJSON()),
             error: (err) => res.status(401).json({ error: err, deck: deck.toJSON() }),
-            sessionToken: req.session.sessionToken,
+            sessionToken: req.session.sessionToken || req.body.sessionToken,
           });
         },
         error: (deck, error) => res.status(402).json({ error, deck: deck.toJSON() }),
-        sessionToken: req.session.sessionToken,
+        sessionToken: req.session.sessionToken || req.body.sessionToken,
       });
       return null;
     },
     error: (err) => res.status(403).json({ error: err, deck: {} }),
-    sessionToken: req.session.sessionToken,
+    sessionToken: req.session.sessionToken || req.body.sessionToken,
   });
   return null;
 });
@@ -143,19 +131,17 @@ router.param('gid', async (req, res, next, gid) => {
 
 router.get('/:gid', async (req, res) => {
 
-  req.session.sessionToken = req.session.sessionToken || req.body.sessionToken;
   const query = new Parse.Query(DeckObject);
   query.equalTo('gid', req.gid);
   query.find({
     success: (results) => res.status(200).json(results.map((d) => d.toJSON())),
     error: (deck, error) => res.status(400).json({ error, deck: deck.toJSON(deck) }),
-    sessionToken: req.session.sessionToken,
+    sessionToken: req.session.sessionToken || req.body.sessionToken,
   });
 });
 
 
 router.post('/:gid', async (req, res) => {
-  req.session.sessionToken = req.session.sessionToken || req.body.sessionToken;
   const indexGroup = randomstring(30);
   console.log("body", req.body);
   const bodyTransactions = req.body.transactions;
@@ -178,13 +164,12 @@ router.post('/:gid', async (req, res) => {
   Parse.Object.saveAll(transactions, {
     success: (list) => res.status(200).json(list),
     error: (error) => res.status(500).json(error),
-    sessionToken: req.session.sessionToken,
+    sessionToken: req.session.sessionToken || req.body[0].sessionToken,
   });
   return null;
 });
 
 router.get('/:gid/transactions', async(req, res) => {
-  req.session.sessionToken = req.session.sessionToken || req.body.sessionToken;
   const query = new Parse.Query(TransactionObject);
   if (req.query.indexGroup) {
     query.equalTo('indexGroup', req.query.indexGroup);
@@ -198,7 +183,7 @@ router.get('/:gid/transactions', async(req, res) => {
   query.find({
     success: (results) => res.status(200).json(results.map((deck) => deck.toJSON())),
     error: (error) => res.status(500).json(error),
-    sessionToken: req.session.sessionToken,
+    sessionToken: req.session.sessionToken || req.body.sessionToken,
   });
 });
 

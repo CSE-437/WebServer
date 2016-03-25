@@ -15,6 +15,7 @@ import s from './Navigation.scss';
 import withStyles from '../../decorators/withStyles';
 import Link from '../Link';
 
+
 import { Navbar, Nav, NavItem } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 import { Modal, Input, ButtonInput } from 'react-bootstrap';
@@ -44,6 +45,10 @@ class Navigation extends Component {
     // makes the DeckStore call the onchange function whenever it cnanges.
     // This is why we had to use bind
     ProfileStore.listen(this.onChange);
+    $.notify({
+	title: "Welcome:",
+	message: "This plugin has been provided to you by Robert McIntosh aka mouse0270"
+});
     // As soon as it is poling for data get data
   }
 
