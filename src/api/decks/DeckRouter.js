@@ -110,7 +110,7 @@ router.post('/', async (req, res) => {
           t.set('data', { gid });
           t.save(null, {
             success: () => res.status(200).json(deck.toJSON()),
-            error: (err) => res.status(401).json({ error: err, deck: deck.toJSON() }),
+            error: (deck, errr) => res.status(401).json({ error: err, deck: deck.toJSON() }),
             sessionToken: req.session.sessionToken || req.body.sessionToken,
           });
         },
