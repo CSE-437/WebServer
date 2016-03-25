@@ -84,9 +84,8 @@ class Navigation extends Component {
   register(event) {
     event.preventDefault();
     const username = event.target[0].value;
-    const email = event.target[1].value;
-    const password = event.target[2].value;
-    ProfileActions.signup({ username, email, password });
+    const password = event.target[1].value;
+    ProfileActions.signup({ username, password });
     this.closeRegisterModal();
   }
 
@@ -145,7 +144,6 @@ class Navigation extends Component {
           <Modal.Body>
           <form onSubmit={ this.register.bind(this) }>
             <Input type="text" label="Username" placeholder="Username" ref="usernameField" value={this.state.username} />
-            <Input type="text" label="Email" placeholder="Email" ref="emailField" value={this.state.email} />
             <Input type="password" label="Password" ref="passwordField" />
             <ButtonInput type="submit" value="Register" />
           </form>

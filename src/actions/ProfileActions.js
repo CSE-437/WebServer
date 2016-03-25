@@ -36,7 +36,7 @@ class ProfileActions {
       })
       .fail((data) => {
         self.logInFail(data);
-        // .log('failed to login');
+        console.log('failed to login');
       });
   }
 
