@@ -26,10 +26,6 @@ class DeckListItem extends Component {
     this.setState({ showModal: true });
   }
 
-  subscribe() {
-    ProfileActions.postTransactions(ProfileStore.getState().user.username, [{query: 'aSUBSCRIPTION', data: {gid: this.props.deck.gid}}]);
-    alert("You're subscribed!");
-  }
 
 
   render() {
@@ -57,7 +53,6 @@ class DeckListItem extends Component {
       <div>
       <Panel header={title}>
       <blockquote>Description: {deck.description}</blockquote>
-      <Button onClick={this.subscribe.bind(this)}>Subscribe</Button><br />
       <Button onClick={this.open.bind(this)}>Get Link</Button><br />
       {keywords}<br />
       {subscribers}<br />

@@ -4,6 +4,7 @@ import s from './DeckPage.scss'; // Import custom styles
 import DeckStore from '../../stores/DeckStore';
 import DeckActions from '../../actions/DeckActions';
 import ProfileActions from '../../actions/ProfileActions';
+import ProfileStore from '../../stores/ProfileStore';
 import Link from '../Link'
 const objectAssign = require('object-assign');
 
@@ -43,7 +44,8 @@ class DeckPage extends Component {
   }
 
   subscribe(index, deck) {
-
+    alert(`subscribed, ${index}, ${deck.gid}`);
+    ProfileActions.postTransactions(ProfileStore.getState().user.username, [{query: 'aSUBSCRIPTION', data: {gid: deck.gid}}]);
   }
 
   onChange(state) {
@@ -107,7 +109,7 @@ class DeckPage extends Component {
               <br />
 
               </Col>
-              <Col xs={6}><DeckList decks={this.state.decks} actions={[new DeckListAction("Test", (index, deck) => console.log(index, deck))]} /></Col>
+              <Col xs={6}><DeckList decks={this.state.decks} actions={[new DeckListAction("Subscribe", this.subscribe)]} /></Col>
             </Row>
           </Grid>
 
