@@ -57,32 +57,11 @@ server.use(express.static(path.join(__dirname, 'public')));
 //
 // Register API middleware
 // -----------------------------------------------------------------------------
-server.use('/api', async (req, res, next) => {
-  if(req.session && req.session.username && req.session.sessionToken){
-    req.username = req.session.username
-    req.sessionToken = req.session.sessionToken;
-    return next();
-  }else if(IsArray(req.body)){
-    const body = req.body[0];
-    if(body && (body.username || body.owner ) && body.sessionToken){
-      req.username = body.username || body.owner;
-      req.sessionToken = body.sessionToken;
-      return next();
-    }else{
-      return res.status(400).json({error: " Must send username and sessionToken with the first element of array" });
-    }
-  }else if(req.body && (req.body.username || req.body.owner) && req.body.sessionToken){
-    req.username = req.body.owner || req.body.username;
-    req.sessionToken = req.body.sessionToken;
-    return next();
-  }
-  return res.status(400).json({ error: "Must send username and session Token" });
-});
+server.use('/api/content', require('./api/content'));
 server.use('/api/users', require('./api/users/UserRouter'));
 server.use('/api/decks', require('./api/decks/DeckRouter'));
 server.use('/api/cards', require('./api/cards/CardRouter'));
 server.use('/api/todo', require('./api/todo'));
-server.use('/api/content', require('./api/content'));
 
 
 //
