@@ -67,6 +67,7 @@ class Navigation extends Component {
 
   logIn(event) {
     event.preventDefault();
+    console.log("holla in login");
     const username = event.target[0].value;
     const password = event.target[1].value;
     ProfileActions.logIn({ username, password });
@@ -88,9 +89,10 @@ class Navigation extends Component {
 
   register(event) {
     event.preventDefault();
+    console.log('holla in register');
     const username = event.target[0].value;
     const password = event.target[1].value;
-    ProfileActions.signup({ username, password });
+    ProfileActions.signUp({ username, password });
     this.closeRegisterModal();
   }
 
