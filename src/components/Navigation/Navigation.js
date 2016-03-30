@@ -108,7 +108,7 @@ class Navigation extends Component {
     const RegisterModalButton = <NavItem onClick = {this.openRegisterModal}>Register</NavItem>
 
     return (
-      <Navbar inverse>
+      <Navbar>
         <Navbar.Header>
           <Navbar.Brand>
             <a className={s.link} href="/" onClick={Link.handleClick}>AnkiHub</a>

@@ -19,7 +19,6 @@ class Footer extends Component {
     const cx = classNames([s.root, 'footer', 'navbar-fixed-bottom']);
     return (
       <footer className={cx}>
-        <a href="https://github.com/CSE-437">Github</a>
       </footer>
     );
   }
