@@ -16,6 +16,7 @@ class ProfileStore {
       decks: [],
       user: {},
       loggedIn: false,
+      deckSubscriptions: [],
     };
   }
   /* *********************
@@ -24,6 +25,11 @@ class ProfileStore {
   onGetMyDecksSuccess(decks) {
     console.log('hello', decks);
     this.setState({ decks });
+  }
+
+  onGetMySubscriptionsSuccess(deckSubscriptions){
+    console.log('Got Subscriptions');
+    this.setState({ deckSubscriptions });
   }
   /* *********************
   LOGIN FUNCTIONS
