@@ -99,10 +99,10 @@ class ProfileActions {
     const self = this;
     $.post(`/api/users/${username}`, t)
     .done((data) => {
-      self.postTransactionsSuccess(data)
+      self.postTransactionsSuccess(data);
     })
     .fail((data) => {
-      self.postTransactionsFail(data)
+      self.postTransactionsFail(data);
     });
   }
 
