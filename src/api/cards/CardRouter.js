@@ -54,6 +54,10 @@ router.get('/', async (req, res) => {
     query.equalTo('did', req.query.did);
     }
     const limit = (req.query.limit)? parseInt(req.query.limit) : 20;
+  query.include('CardType');
+  query.include('CardType.FrontSide');
+  query.include('CardType.BackSide');
+  query.include('CardStyle');
   query.limit(limit);
 
   query.find({

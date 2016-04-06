@@ -6,7 +6,7 @@ import IsArray from '../../core/isArray';
 const Parse = require('parse/node');
 const randomstring = require('randomstring').generate;
 
-import DeckObject from './DeckModel';
+import DeckObject, { DeckUtil } from './DeckModel';
 import TransactionObject from '../transactions/TransactionModel';
 
 const router = new Router();
@@ -37,23 +37,23 @@ router.get('/', async (req, res) => {
   const query = new Parse.Query(DeckObject);
   if (req.query.keywords) {
     query.containsAll('keywords', [].concat(req.query.keywords));
-    }
-    if (req.query.name) {
+  }
+  if (req.query.name) {
     query.equalTo('name', req.query.name);
-    }
-    if (req.query.cids) {
+  }
+  if (req.query.cids) {
     query.containsAll('cids', [].concat(req.query.cids));
-    }
-    if (req.query.owner) {
+  }
+  if (req.query.owner) {
     query.equalTo('owner', req.query.user);
-    }
-    if (req.query.gid) {
+  }
+  if (req.query.gid) {
     query.equalTo('gid', req.query.gid);
-    }
-    if (req.query.did) {
+  }
+  if (req.query.did) {
     query.equalTo('did', req.query.did);
-    }
-    const limit = (req.query.limit)? parseInt(req.query.limit) : 20;
+  }
+  const limit = (req.query.limit) ? parseInt(req.query.limit, 10) : 20;
   query.limit(limit);
 
   query.find({
@@ -68,38 +68,49 @@ router.post('/', async (req, res) => {
   if (!req.body.gid && !req.body.did) {
     return res.status(400).json({ err: 'Must have a did or gid' });
   }
-
+  var i = 0;
+  let gid = '';
+  let did = '';
   if (req.body.gid) {
-    query.equalTo('gid', req.body.gid);
+    gid = req.body.gid;
+    query.equalTo('gid', gid);
   } else if (req.body.did) {
-    query.equalTo('gid', `${req.username }:${req.body.did}`);
+    gid = [req.username, req.body.did].join(':');
+    query.equalTo('gid', gid);
+  }
+  if (req.body.did) {
+    did = req.body.did;
+  } else {
+    did = gid.split(':')[1];
   }
   query.find({
     success: (results) => {
-      if (results[0]) {
+      if (results.length > 0) {
         return res.status(400).json({ error: 'Deck already Exist' });
       }
       // TODO : Validate Decks
-      const newDeck = new Parse.Object('Deck');
-      Object.keys(req.body).forEach((key) => newDeck.set(key, req.body[key]));
-      const gid = req.body.gid || `${req.username}:${req.body.did}`;
-      const did = gid.split(':')[1];
-      newDeck.set('gid', gid);
-      newDeck.set('did', did);
-      newDeck.set('owner', req.username);
+      const newDeck = DeckUtil.newDeck(req.username, gid, did, req.body);
+      if (!newDeck) {
+        return res.status(400).json({ error: 'Deck has malformed cards' })
+      }
       newDeck.save(null, {
         success: (deck) => {
+          console.log(`Post ${i++}`);
           const userQuery = new Parse.Query(Parse.User);
           userQuery.equalTo('username', req.username);
-          userQuery.find({
+          userQuery.first({
             success: (user) => {
-              if(!user.get('decks')){
+              if (!user) {
+                return;
+              }
+              if (!user.get('decks')) {
                 user.set('decks', []);
               }
               user.addUnique('decks', deck);
               user.save();
             },
           });
+          console.log(`Post ${i++}`);
 
           // Set Ownership of Deck
           const t = new Parse.Object('Transaction');
@@ -110,9 +121,10 @@ router.post('/', async (req, res) => {
           t.set('index', 0);
           t.set('query', 'aDECK');
           t.set('data', { gid });
+          console.log(`Post ${i++}`);
           t.save(null, {
             success: () => res.status(200).json(deck.toJSON()),
-            error: (deck, errr) => res.status(401).json({ error: err, deck: deck.toJSON() }),
+            error: (d, err) => res.status(401).json({ error: err, deck: d.toJSON() }),
             sessionToken: req.sessionToken,
           });
         },
@@ -132,9 +144,7 @@ router.param('gid', async (req, res, next, gid) => {
 });
 
 router.get('/:gid', async (req, res) => {
-
-  const query = new Parse.Query(DeckObject);
-  query.equalTo('gid', req.gid);
+  const query = DeckUtil.getDeckWithCardsQuery(req.gid);
   query.find({
     success: (results) => res.status(200).json(results.map((d) => d.toJSON())),
     error: (deck, error) => res.status(400).json({ error, deck: deck.toJSON(deck) }),
@@ -146,7 +156,7 @@ router.get('/:gid', async (req, res) => {
 router.post('/:gid', async (req, res) => {
   const indexGroup = randomstring(30);
   const bodyTransactions = req.body.transactions || req.body;
-  //console.log(bodyTransactions)
+  // console.log(bodyTransactions)
   if (!IsArray(bodyTransactions) && !(bodyTransactions.length > 0)) {
     return res.status(400).json({ error: `Must send array of transactions: IsArray: ${bodyTransactions.isArray()}, length: bodyTransactions.length`} );
   }
@@ -163,7 +173,7 @@ router.post('/:gid', async (req, res) => {
 
   Parse.Object.saveAll(transactions, {
     success: (list) => res.status(200).json(list),
-    error: (t, error) => {console.log(arguments); return res.status(500).json(error);},
+    error: (t, error) => {return res.status(500).json(error);},
     sessionToken: req.sessionToken,
   });
   return null;

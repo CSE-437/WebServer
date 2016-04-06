@@ -70,6 +70,8 @@ class ProfilePage extends Component {
     const page = (this.state.loggedIn)? (<div className="ProfilePage">
       <h3>Welcome {this.state.user.username}</h3>
       <span>Here are your decks</span>
+      <DeckList/>
+      <hr/>
       <DeckList decks={this.state.decks}/>
     </div>) : (<h3>Please Login</h3>);
     return page;
