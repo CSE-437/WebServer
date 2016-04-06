@@ -19,41 +19,43 @@ class ProfileActions {
       'updateUserSuccess',
       'updateUserFail',
       'getMySubscriptionsSuccess',
+      'getMyTransactionsSuccess',
+      'getMyTransactionsFail',
     );
   }
 
   signUp(info) {
     const self = this;
     $.post('/api/users/signup', info)
-      .done((data) => {
-        self.signUpSuccess(data);
-      })
-      .fail((data) => {
-        self.signUpFail(data);
-      });
+    .done((data) => {
+      self.signUpSuccess(data);
+    })
+    .fail((data) => {
+      self.signUpFail(data);
+    });
   }
 
   logIn(info) {
     const self = this;
     $.post('/api/users/login', info)
-      .done((data) => {
-        self.logInSuccess(data);
-      })
-      .fail((data) => {
-        self.logInFail(data);
-        console.log('failed to login');
-      });
+    .done((data) => {
+      self.logInSuccess(data);
+    })
+    .fail((data) => {
+      self.logInFail(data);
+      console.log('failed to login');
+    });
   }
 
   logOut() {
     const self = this;
     $.post('/api/users/logout')
-      .done((data) => {
-        self.logOutSuccess(data);
-      })
-      .fail((data) => {
-        self.logOutFail(data);
-      });
+    .done((data) => {
+      self.logOutSuccess(data);
+    })
+    .fail((data) => {
+      self.logOutFail(data);
+    });
   }
 
   getMyDecks(username) {
@@ -61,39 +63,50 @@ class ProfileActions {
     if (!username) {
       return self.getMyDecksFail({ error: "Not Logged In " });
     }
-    $.get(`/api/decks?${username}`)
-      .done((data) => {
-        self.getMyDecksSuccess(data);
-      })
-      .fail((data) => {
-        self.getMyDecksFail(data);
-      });
+    $.get(`/api/decks?owner=${username}`)
+    .done((data) => {
+      self.getMyDecksSuccess(data);
+    })
+    .fail((data) => {
+      self.getMyDecksFail(data);
+    });
   }
-
+  getMyTransactions(username) {
+    const self = this;
+    if (!username) {
+      return self.getMyTransactionsFail({ error: 'Not Logged In' });
+    }
+    $.get(`/api/transactions?owner=${username}`)
+    .done((data) => {
+      self.getMyTransactionsSuccess(data);
+    })
+    .fail((data) => {
+      self.getMyTransactionsFail(data);
+    });
+  }
   getMySubscriptions(subscriptions) {
     const self = this;
     let numDone = 0;
-    const toReturn  = [];
-    for(i = 0; i < subscriptions.length; i++){
-      $.get(`/api/decks?${subscriptions[i]}`)
-        .done((data) => {
-          numDone++;
-          toReturn.push(data);
-          if(numDone >= subscriptions.length){
-              self.getMySubscriptionsSuccess(toReturn);
-          }
-        })
-        .fail((data) => {
-          numDone++;
-          numDone++;
-          toReturn.push(data);
-          if(numDone >= subscriptions.length){
-              self.getMySubscriptionsSuccess(toReturn);
-          }
-        });
+    const toReturn = [];
+    const doneFunc = (data) => {
+      numDone++;
+      toReturn.push(data[0]);
+      if (numDone >= subscriptions.length) {
+        self.getMySubscriptionsSuccess(toReturn.filter((d) => !!d));
+      }
+    };
+    const failFunc = () => {
+      numDone++;
+      if (numDone >= subscriptions.length) {
+        self.getMySubscriptionsSuccess(toReturn.filter((d) => !!d));
+      }
+    };
+    for (let i = 0; i < subscriptions.length; i++) {
+      $.get(`/api/decks/${subscriptions[i]}`)
+      .done(doneFunc)
+      .fail(failFunc);
     }
   }
-
   postTransactions(username, transactions) {
     const t = { transactions };
     const self = this;
@@ -109,12 +122,12 @@ class ProfileActions {
   updateUser(options) {
     const self = this;
     $.get(`/api/users?${$.param(options, true)}`)
-      .done((data) => {
-        self.updateUserSuccess(data[0]);
-      })
-      .fail((data) => {
-        self.updateUserFail(data);
-      });
+    .done((data) => {
+      self.updateUserSuccess(data[0]);
+    })
+    .fail((data) => {
+      self.updateUserFail(data);
+    });
   }
 }
 

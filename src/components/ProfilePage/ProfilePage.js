@@ -50,8 +50,7 @@ class ProfilePage extends Component {
     // makes the DeckStore call the onchange function whenever it cnanges.
     // This is why we had to use bind
     ProfileStore.listen(this.onChange);
-    console.log('here');
-    ProfileActions.getMyDecks(this.state.user.username);
+    this.startPolling();
     // As soon as it is poling for data get data
   }
 
@@ -62,25 +61,32 @@ class ProfilePage extends Component {
 
   // simply sets the state whenever the Deck store changes
   onChange(state) {
-    console.log("New State");
-    console.log("subscriptions", this.state.user.subscriptions);
-    if(this.state.deckSubscriptions.length == 0 && (this.state.user.subscriptions.length > 0)){
-      ProfileActions.getMySubscriptions(this.state.user.subscriptions);
-    }
+    console.log("Profile Page State");
+    console.log(this.state);
     this.setState(state);
+  }
 
+  startPolling() {
+    const self = this;
+    setTimeout(() => {
+      ProfileActions.getMyDecks(self.state.user.username);
+      ProfileActions.getMyTransactions(self.state.user.username);
+      if (this.state.user.subscriptions) {
+        ProfileActions.getMySubscriptions(self.state.user.subscriptions);
+      }
+    }, 1000);
   }
 
   render() {
-    console.log(this.state)
+    console.log(this.state.deckSubscriptions);
+    const subscriptions = this.state.deckSubscriptions || [];
     const page = (this.state.loggedIn)? (<div className="ProfilePage">
       <h3>Welcome {this.state.user.username}</h3>
-      <span> Here are your subscriptions </span>
-      <hr> <DeckList decks= {this.state.deckSubscriptions} /> </hr>
-      <span>Here are your decks</span>
-      <DeckList/>
-      <hr/>
-      <DeckList decks={this.state.decks}/>
+      <h2> Here are your subscriptions </h2>
+      <br /> <DeckList decks= {subscriptions} />
+      <hr />
+      <h2>Here are your decks</h2>
+      <DeckList decks={this.state.decks} />
     </div>) : (<h3>Please Login</h3>);
     return page;
   }

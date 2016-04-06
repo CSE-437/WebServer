@@ -10,10 +10,10 @@ class DeckList extends Component{
   }
 
 render(){
-  console.log(this.props.actions);
-  const actions = this.props.actions;
-  let deckNodes = this.props.decks.map((deck, index) => {
-    var bActions = (!actions)? <span>No Actions</span> :  actions.map((action, i) => {
+  const decks = this.props.decks || [];
+  const actions = this.props.actions || [];
+  const deckNodes = decks.map((deck, index) => {
+    const bActions = (!actions) ? <span>No Actions</span> :  actions.map((action, i) => {
       return (<Button key={index} onClick={ actions[i].action.bind(null, index, deck) }>{ actions[i].name }</Button>)
     });
 

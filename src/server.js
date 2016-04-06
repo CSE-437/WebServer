@@ -61,7 +61,7 @@ server.use('/api/content', require('./api/content'));
 server.use('/api/users', require('./api/users/UserRouter'));
 server.use('/api/decks', require('./api/decks/DeckRouter'));
 server.use('/api/cards', require('./api/cards/CardRouter'));
-server.use('/api/todo', require('./api/todo'));
+server.use('/api/transactions', require('./api/transactions/TransactionRouter'));
 
 
 //

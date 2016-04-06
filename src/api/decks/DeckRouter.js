@@ -11,6 +11,8 @@ import TransactionObject from '../transactions/TransactionModel';
 
 const router = new Router();
 
+
+// For the remaining routes require login.
 router.use(async (req, res, next) => {
   if(req.session && req.session.username && req.session.sessionToken){
     req.username = req.session.username
@@ -33,6 +35,11 @@ router.use(async (req, res, next) => {
   return res.status(400).json({ error: "Must send username and session Token" });
 });
 
+router.param('gid', async (req, res, next, gid) => {
+  req.gid = gid;
+  next();
+});
+
 router.get('/', async (req, res) => {
   const query = new Parse.Query(DeckObject);
   if (req.query.keywords) {
@@ -45,7 +52,7 @@ router.get('/', async (req, res) => {
     query.containsAll('cids', [].concat(req.query.cids));
   }
   if (req.query.owner) {
-    query.equalTo('owner', req.query.user);
+    query.equalTo('owner', req.query.owner);
   }
   if (req.query.gid) {
     query.equalTo('gid', req.query.gid);
@@ -62,6 +69,37 @@ router.get('/', async (req, res) => {
     sessionToken: req.sessionToken,
   });
 });
+
+router.get('/:gid', async (req, res) => {
+  const query = DeckUtil.getDeckWithCardsQuery(req.gid);
+  query.find({
+    success: (results) => res.status(200).json(results.map((d) => d.toJSON())),
+    error: (deck, error) => res.status(400).json({ error, deck: deck.toJSON(deck) }),
+    sessionToken: req.sessionToken,
+  });
+});
+
+router.get('/:gid/transactions', async(req, res) => {
+  const query = new Parse.Query(TransactionObject);
+  if (req.query.indexGroup) {
+    query.equalTo('indexGroup', req.query.indexGroup);
+  }
+  if (req.query.since) {
+    query.whereGreaterThan('createdAt', req.query.since);
+  }
+  query.limit(req.query.limit || 20);
+  query.descending('createdAt');
+
+  query.find({
+    success: (results) => res.status(200).json(results.map((deck) => deck.toJSON())),
+    error: (r, error) => res.status(500).json(error),
+    sessionToken: req.sessionToken,
+  });
+});
+
+
+
+
 // Only for posting decks
 router.post('/', async (req, res) => {
   const query = new Parse.Query(DeckObject);
@@ -138,19 +176,6 @@ router.post('/', async (req, res) => {
   });
   return null;
 });
-router.param('gid', async (req, res, next, gid) => {
-  req.gid = gid;
-  next();
-});
-
-router.get('/:gid', async (req, res) => {
-  const query = DeckUtil.getDeckWithCardsQuery(req.gid);
-  query.find({
-    success: (results) => res.status(200).json(results.map((d) => d.toJSON())),
-    error: (deck, error) => res.status(400).json({ error, deck: deck.toJSON(deck) }),
-    sessionToken: req.sessionToken,
-  });
-});
 
 
 router.post('/:gid', async (req, res) => {
@@ -179,22 +204,5 @@ router.post('/:gid', async (req, res) => {
   return null;
 });
 
-router.get('/:gid/transactions', async(req, res) => {
-  const query = new Parse.Query(TransactionObject);
-  if (req.query.indexGroup) {
-    query.equalTo('indexGroup', req.query.indexGroup);
-  }
-  if (req.query.since) {
-    query.whereGreaterThan('createdAt', req.query.since);
-  }
-  query.limit(req.query.limit || 20);
-  query.descending('createdAt');
-
-  query.find({
-    success: (results) => res.status(200).json(results.map((deck) => deck.toJSON())),
-    error: (r, error) => res.status(500).json(error),
-    sessionToken: req.sessionToken,
-  });
-});
 
 export default router;
