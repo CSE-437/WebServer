@@ -62,13 +62,21 @@ class ProfilePage extends Component {
 
   // simply sets the state whenever the Deck store changes
   onChange(state) {
+    console.log("New State");
+    console.log("subscriptions", this.state.user.subscriptions);
+    if(this.state.deckSubscriptions.length == 0 && (this.state.user.subscriptions.length > 0)){
+      ProfileActions.getMySubscriptions(this.state.user.subscriptions);
+    }
     this.setState(state);
+
   }
 
   render() {
     console.log(this.state)
     const page = (this.state.loggedIn)? (<div className="ProfilePage">
       <h3>Welcome {this.state.user.username}</h3>
+      <span> Here are your subscriptions </span>
+      <hr> <DeckList decks= {this.state.deckSubscriptions} /> </hr>
       <span>Here are your decks</span>
       <DeckList/>
       <hr/>

@@ -18,6 +18,7 @@ class ProfileActions {
       'postTransactionsFail',
       'updateUserSuccess',
       'updateUserFail',
+      'getMySubscriptionsSuccess',
     );
   }
 
@@ -69,15 +70,39 @@ class ProfileActions {
       });
   }
 
+  getMySubscriptions(subscriptions) {
+    const self = this;
+    let numDone = 0;
+    const toReturn  = [];
+    for(i = 0; i < subscriptions.length; i++){
+      $.get(`/api/decks?${subscriptions[i]}`)
+        .done((data) => {
+          numDone++;
+          toReturn.push(data);
+          if(numDone >= subscriptions.length){
+              self.getMySubscriptionsSuccess(toReturn);
+          }
+        })
+        .fail((data) => {
+          numDone++;
+          numDone++;
+          toReturn.push(data);
+          if(numDone >= subscriptions.length){
+              self.getMySubscriptionsSuccess(toReturn);
+          }
+        });
+    }
+  }
+
   postTransactions(username, transactions) {
     const t = { transactions };
     const self = this;
     $.post(`/api/users/${username}`, t)
     .done((data) => {
-      self.postTransactionsSuccess(data)
+      self.postTransactionsSuccess(data);
     })
     .fail((data) => {
-      self.postTransactionsFail(data)
+      self.postTransactionsFail(data);
     });
   }
 

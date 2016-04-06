@@ -10,11 +10,12 @@
 @import '../variables.scss';
 
 .root {
-
+    text-align: center;
 }
 
 .container {
-  margin: 5 auto;
-  padding: 0 0 40px;
-  max-width: $max-content-width;
+    max-width: 70vw;
+    margin: 0 auto;
+    padding: 0 0 40px;
+    text-align: left;
 }

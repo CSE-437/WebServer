@@ -67,6 +67,7 @@ class Navigation extends Component {
 
   logIn(event) {
     event.preventDefault();
+    console.log("holla in login");
     const username = event.target[0].value;
     const password = event.target[1].value;
     ProfileActions.logIn({ username, password });
@@ -88,9 +89,10 @@ class Navigation extends Component {
 
   register(event) {
     event.preventDefault();
+    console.log('holla in register');
     const username = event.target[0].value;
     const password = event.target[1].value;
-    ProfileActions.signup({ username, password });
+    ProfileActions.signUp({ username, password });
     this.closeRegisterModal();
   }
 
@@ -106,7 +108,7 @@ class Navigation extends Component {
     const RegisterModalButton = <NavItem onClick = {this.openRegisterModal}>Register</NavItem>
 
     return (
-      <Navbar inverse>
+      <Navbar>
         <Navbar.Header>
           <Navbar.Brand>
             <a className={s.link} href="/" onClick={Link.handleClick}>AnkiHub</a>
