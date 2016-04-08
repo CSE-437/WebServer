@@ -78,6 +78,10 @@ router.get('/:gid', async (req, res) => {
 
   const query = new Parse.Query(CardObject);
   query.equalTo('gid', req.gid);
+  query.include('CardType');
+  query.include('CardType.FrontSide');
+  query.include('CardType.BackSide');
+  query.include('style');
   query.find({
     success: (results) => res.status(200).json(results.map((d) => d.toJSON())),
     error: (Card, error) => res.status(400).json({ error, Card: Card.toJSON(Card) }),
@@ -123,7 +127,7 @@ router.post('/:gid', async (req, res) => {
 
   Parse.Object.saveAll(transactions, {
     success: (list) => res.status(200).json(list),
-    error: (t, error) => {console.log(arguments); return res.status(500).json(error);},
+    error: (error) => {console.log(arguments); return res.status(500).json(error);},
     sessionToken: req.sessionToken,
   });
   return null;
