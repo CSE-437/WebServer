@@ -60,6 +60,9 @@ router.get('/', async (req, res) => {
   if (req.query.did) {
     query.equalTo('did', req.query.did);
   }
+  if (req.query.since) {
+    query.whereGreaterThan('createdAt', req.query.since);
+  }
   const limit = (req.query.limit) ? parseInt(req.query.limit, 10) : 20;
   query.limit(limit);
 

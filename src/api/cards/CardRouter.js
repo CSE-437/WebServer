@@ -91,9 +91,6 @@ router.get('/:gid', async (req, res) => {
 
 router.get('/:gid/transactions', async(req, res) => {
   const query = new Parse.Query(TransactionObject);
-  if (req.query.indexGroup) {
-    query.equalTo('indexGroup', req.query.indexGroup);
-  }
   if (req.query.since) {
     query.whereGreaterThan('createdAt', req.query.since);
   }
