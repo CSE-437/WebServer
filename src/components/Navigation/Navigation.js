@@ -76,6 +76,7 @@ class Navigation extends Component {
 
   logOut() {
     ProfileActions.logOut();
+    window.location.reload();
   }
 
 
@@ -91,6 +92,7 @@ class Navigation extends Component {
     const username = event.target[0].value;
     const password = event.target[1].value;
     ProfileActions.signUp({ username, password });
+    ProfileActions.logIn({ username, password });
     this.closeRegisterModal();
   }
 
@@ -100,8 +102,8 @@ class Navigation extends Component {
 
   render() {
     const LogInModalButton = (!this.state.loggedIn)?
-    <NavItem onClick = {this.openLogInModal}>Log In</NavItem>:<NavItem onClick = {this.logOut}>Log Out</NavItem>
-    const RegisterModalButton = <NavItem onClick = {this.openRegisterModal}>Register</NavItem>
+    <NavItem onClick = {this.openLogInModal}>Log In</NavItem> : <NavItem onClick = {this.logOut}>Log Out</NavItem>
+    const RegisterModalButton = (!this.state.loggedIn) ? <NavItem onClick = {this.openRegisterModal}>Register</NavItem> : null;
     const numNotifications = this.state.transactions.filter(t => !t.acknowledged).length;
     const NotificationButton = (numNotifications) ? <NavItem>
       Notifications <Badge>{numNotifications}</Badge>
