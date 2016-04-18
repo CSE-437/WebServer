@@ -11,6 +11,8 @@ import React, { Component, PropTypes } from 'react';
 const objectAssign = require('object-assign');
 import ProfileStore from '../../stores/ProfileStore';
 import ProfileActions from '../../actions/ProfileActions';
+import DeckActions from '../../actions/DeckActions';
+
 import s from './Navigation.scss';
 import withStyles from '../../decorators/withStyles';
 import Link from '../Link';
@@ -71,6 +73,7 @@ class Navigation extends Component {
     const username = event.target[0].value;
     const password = event.target[1].value;
     ProfileActions.logIn({ username, password });
+    DeckActions.setLoginState(true);
     this.closeLogInModal();
   }
 

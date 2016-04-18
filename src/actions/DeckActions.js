@@ -5,6 +5,7 @@ import $ from 'jquery'
 class DeckActions {
   constructor() {
     this.generateActions(
+      'setLoginState',
       'reloadDecks',
       'getAllDecksFail',
       'getAllDecksSuccess',
@@ -17,6 +18,9 @@ class DeckActions {
       'getTransactionsSuccess',
       'getTransactionsFail'
     );
+  }
+  setLoginState(bool) {
+    self.setLoginState(bool);
   }
   getAllDecks(options) {
     const self = this;
