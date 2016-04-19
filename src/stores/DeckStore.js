@@ -9,7 +9,25 @@ class DeckStore {
     this.state.workingDeck = null;
     this.state.transactions = [];
     this.state.decksLoaded = false;
+    this.state.loggedIn = false;
   }
+  
+  /* *********************
+  LOGIN FUNCTIONS
+  ***********************/
+  setLoginState(bool) {
+    this.setState({loggedIn: bool});
+  }
+
+  onPostTransactionsSuccess() {
+    ProfileActions.updateUser({ username: this.state.user.username });
+  }
+
+  onUpdateUserSuccess(u) {
+    const user = u || this.state.user;
+    this.setState({ user });
+  }
+
   onReloadDecks() {
     this.setState({ decksLoaded: false });
   }

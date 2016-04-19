@@ -70,8 +70,7 @@ class DeckPage extends Component {
   }
 
   render() {
-    return (
-      <div className={s.root}>
+     const page = (this.state.loggedIn)? ( <div className={s.root}>
         <div className={s.container}>
           <Grid>
             <Row>
@@ -117,10 +116,9 @@ class DeckPage extends Component {
           <br />
 
         </div>
-      </div>
-    );
+      </div>) : (<h3>Please Login</h3>);
+    return page;
   }
-
 }
 
 export default DeckPage;
