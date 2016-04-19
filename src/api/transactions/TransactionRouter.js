@@ -59,7 +59,7 @@ router.get('/', async (req, res) => {
   });
 });
 
-router.all('/:objectId', async (req, res) => {
+router.get('/:objectId', async (req, res) => {
   const query = new Parse.Query(TransactionObject);
   query.get(req.objectId, {
     success: result => res.status(200).json(result.toJSON()),

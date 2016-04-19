@@ -82,7 +82,7 @@ router.get('/:gid', async (req, res) => {
   });
 });
 
-router.get('/:gid/transactions', async(req, res) => {
+router.all('/:gid/transactions', async(req, res) => {
   const query = new Parse.Query(TransactionObject);
   if (req.query.indexGroup) {
     query.equalTo('indexGroup', req.query.indexGroup);
@@ -90,6 +90,7 @@ router.get('/:gid/transactions', async(req, res) => {
   if (req.query.since) {
     query.whereGreaterThan('createdAt', req.query.since);
   }
+  query.equalTo('on', req.gid);
   query.limit(req.query.limit || 20);
   query.descending('createdAt');
 
@@ -198,10 +199,10 @@ router.post('/:gid', async (req, res) => {
     t.set('index', index);
     return t;
   });
-
+  console.log(transactions.map(t => t.toJSON()));
   Parse.Object.saveAll(transactions, {
     success: (list) => res.status(200).json(list),
-    error: (t, error) => {return res.status(500).json(error);},
+    error: (t, error) => {return res.status(501).json(arguments);},
     sessionToken: req.sessionToken,
   });
   return null;
