@@ -68,7 +68,7 @@ class DeckListItem extends Component {
       <Modal.Title>Paste this link into AnkiHub addon</Modal.Title>
     </Modal.Header>
     <Modal.Body>
-      <Input type="text" value={`${location.origin}/api/decks/${deck.gid}`} />
+      <Input type="text" value={`${location.origin}/api/decks/${deck.gid}/download`} />
     </Modal.Body>
   </Modal>
 

@@ -31,6 +31,10 @@ router.use(async (req, res, next) => {
     req.username = req.body.owner || req.body.username;
     req.sessionToken = req.body.sessionToken;
     return next();
+  }else if(req.query && (req.query.username || req.query.owner) && req.query.sessionToken){
+    req.username = req.query.owner || req.query.username;
+    req.sessionToken = req.query.sessionToken;
+    return next();
   }
   return res.status(400).json({ error: "Must send username and session Token" });
 });
