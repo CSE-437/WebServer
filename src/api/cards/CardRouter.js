@@ -99,7 +99,8 @@ router.all('/:gid/transactions', async(req, res) => {
     query.equalTo('indexGroup', req.query.indexGroup);
   }
   if (req.query.since) {
-    query.whereGreaterThan('createdAt', req.query.since);
+    const since = Date.parse(req.query.since);
+    query.greaterThanOrEqualTo('createdAt', since);
   }
   query.equalTo('on', req.gid);
   query.limit(req.query.limit || 20);

@@ -64,8 +64,8 @@ export const DeckUtil = {
     let toReturn = '';
     let card;
     for (card of deck.get('cards')) {
-      const front = card.get('notes')[0].Front;
-      const back = card.get('notes')[1].Back;
+      const front = card.get('notes').Front;
+      const back = card.get('notes').Back;
       const tags = card.get('tags').join(' ');
       toReturn = `${toReturn}${front}; ${back}; ${tags}\r`;
     }

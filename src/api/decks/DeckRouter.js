@@ -65,7 +65,8 @@ router.get('/', async (req, res) => {
     query.equalTo('did', req.query.did);
   }
   if (req.query.since) {
-    query.whereGreaterThan('createdAt', req.query.since);
+    const since = Date.parse(req.query.since);
+    query.greaterThanOrEqualTo('createdAt', since);
   }
   const limit = (req.query.limit) ? parseInt(req.query.limit, 10) : 20;
   query.limit(limit);
@@ -94,8 +95,7 @@ router.get('/:gid/download', async (req, res) => {
         res.status(403).json({ error: { message: 'Deck Not Found' } });
       } else {
         const csv = DeckUtil.toCSV(result);
-        res.set({ 'Content-Disposition': `attachment; filename=${result.get('gid')}.txt`});
-        res.send(csv);
+        res.status(200).send(csv);
       }
     },
     error: (deck, error) => res.status(400).json({ error, deck: deck.toJSON(deck) }),
@@ -109,7 +109,8 @@ router.all('/:gid/transactions', async(req, res) => {
     query.equalTo('indexGroup', req.query.indexGroup);
   }
   if (req.query.since) {
-    query.whereGreaterThan('createdAt', req.query.since);
+    const since = Date.parse(req.query.since);
+    query.greaterThanOrEqualTo('createdAt', since);
   }
   query.equalTo('on', req.gid);
   query.limit(req.query.limit || 20);
