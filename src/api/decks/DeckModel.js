@@ -43,15 +43,32 @@ export const DeckUtil = {
     const query = new Parse.Query(Deck);
     query.equalTo('gid', gid);
     query.include('cards.pointer');
+    query.include('cards.pointer.front');
+    query.include('cards.pointer.back');
     query.include('cards.pointer.notes');
     query.include('cards.pointer.tags');
     query.include('cards.pointer.CardType');
+    query.include('cards.pointer.CardType.pointer');
     query.include('cards.pointer.CardType.FrontSide');
+    query.include('cards.pointer.CardType.pointer.FrontSide');
     query.include('cards.pointer.CardType.BackSide');
+    query.include('cards.pointer.CardType.pointer.BackSide');
     query.include('cards.pointer.owner');
     query.include('cards.pointer.cid');
     query.include('cards.pointer.did');
     query.include('cards.pointer.gid');
     return query;
   },
+
+  toCSV: (deck) => {
+    let toReturn = '';
+    let card;
+    for (card of deck.get('cards')) {
+      const front = card.get('notes')[0].Front;
+      const back = card.get('notes')[1].Back;
+      const tags = card.get('tags').join(' ');
+      toReturn = `${toReturn}${front}; ${back}; ${tags}\r`;
+    }
+    return toReturn;
+  }
 };

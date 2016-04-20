@@ -82,6 +82,23 @@ router.get('/:gid', async (req, res) => {
   });
 });
 
+router.get('/:gid/download', async (req, res) => {
+  const query = DeckUtil.getDeckWithCardsQuery(req.gid);
+  query.first({
+    success: (result) => {
+      if (!result) {
+        res.status(403).json({ error: { message: 'Deck Not Found' } });
+      } else {
+        const csv = DeckUtil.toCSV(result);
+        res.set({ 'Content-Disposition': `attachment; filename=${result.get('gid')}.txt`});
+        res.send(csv);
+      }
+    },
+    error: (deck, error) => res.status(400).json({ error, deck: deck.toJSON(deck) }),
+    sessionToken: req.sessionToken,
+  });
+});
+
 router.all('/:gid/transactions', async(req, res) => {
   const query = new Parse.Query(TransactionObject);
   if (req.query.indexGroup) {
@@ -93,16 +110,12 @@ router.all('/:gid/transactions', async(req, res) => {
   query.equalTo('on', req.gid);
   query.limit(req.query.limit || 20);
   query.descending('createdAt');
-
   query.find({
     success: (results) => res.status(200).json(results.map((deck) => deck.toJSON())),
     error: (r, error) => res.status(500).json(error),
     sessionToken: req.sessionToken,
   });
 });
-
-
-
 
 // Only for posting decks
 router.post('/', async (req, res) => {

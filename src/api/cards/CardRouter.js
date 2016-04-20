@@ -89,16 +89,19 @@ router.get('/:gid', async (req, res) => {
   });
 });
 
-router.get('/:gid/transactions', async(req, res) => {
+router.all('/:gid/transactions', async(req, res) => {
   const query = new Parse.Query(TransactionObject);
+  if (req.query.indexGroup) {
+    query.equalTo('indexGroup', req.query.indexGroup);
+  }
   if (req.query.since) {
     query.whereGreaterThan('createdAt', req.query.since);
   }
+  query.equalTo('on', req.gid);
   query.limit(req.query.limit || 20);
   query.descending('createdAt');
-
   query.find({
-    success: (results) => res.status(200).json(results.map((Card) => Card.toJSON())),
+    success: (results) => res.status(200).json(results.map((deck) => deck.toJSON())),
     error: (r, error) => res.status(500).json(error),
     sessionToken: req.sessionToken,
   });
