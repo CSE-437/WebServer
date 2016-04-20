@@ -31,7 +31,7 @@ class SearchBar extends Component {
         <div className="input-group col-md-8">
         <Input type="text" placeholder={this.props.placeholder} value={this.state.searchText} onChange={this.handleChange.bind(this)}/>
         <span className="input-group-btn">
-          <button onClick={this.clear.bind(this)} className="btn btn-danger" type="button">
+          <button onClick={this.clear.bind(this)} className="btn btn-default" type="button">
             <span className=" glyphicon glyphicon-remove"></span>
           </button>
           <button onClick={this.search.bind(this)} className="btn btn-info" type="button">

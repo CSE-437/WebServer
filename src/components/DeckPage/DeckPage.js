@@ -70,11 +70,12 @@ class DeckPage extends Component {
   }
 
   render() {
-     const page = (this.state.loggedIn)? ( <div className={s.root}>
-        <div className={s.container}>
-          <Grid>
-            <Row>
-              <Col xs={6}>
+    const page = (this.state.loggedIn)? ( <div className={s.root}>
+      <div className={s.container}>
+        <Grid>
+          <Row>
+
+            <Col xs={6} className={s.fixed}>
               <h2>Deck Search</h2><Loader loaded={this.state.decksLoaded} />
               <br />
               <h4>Search By Name:</h4>
@@ -106,17 +107,15 @@ class DeckPage extends Component {
               <SearchBar placeholder="username:did:cid"
                 onSearch={this.modifySearch.bind(this,'cid')} />
               <br />
+            </Col>
 
-              </Col>
-              <Col xs={6}><DeckList decks={this.state.decks} actions={[new DeckListAction("Subscribe", this.subscribe)]} /></Col>
-            </Row>
-          </Grid>
+            <Col xs={6}><DeckList decks={this.state.decks} className={s.decks} actions={[new DeckListAction("Subscribe", this.subscribe)]} /></Col>
 
-
-          <br />
-
-        </div>
-      </div>) : (<h3>Please Login</h3>);
+          </Row>
+        </Grid>
+        <br />
+      </div>
+    </div>) : (<h3>Please Login</h3>);
     return page;
   }
 }

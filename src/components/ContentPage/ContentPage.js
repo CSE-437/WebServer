@@ -28,12 +28,11 @@ class ContentPage extends Component {
   render() {
     this.context.onSetTitle(this.props.title);
     return (
+
       <div className={s.root}>
         <div className={s.container}>
           {this.props.path === '/' ? null : <h1>{this.props.title}</h1>}
           <div dangerouslySetInnerHTML={{ __html: this.props.content || '' }} />
-        i am from contentpage.js omg!!!
-        this.props.content, the stuff you see above, is set in index.jade wow!!!!
         </div>
       </div>
     );
