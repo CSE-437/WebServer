@@ -1,5 +1,6 @@
 import dispatcher from '../core/Dispatcher';
 import $ from 'jquery';
+import DeckActions from './DeckActions';
 
 // Remember that this file runs on the client not the server
 class ProfileActions {
@@ -26,9 +27,11 @@ class ProfileActions {
 
   signUp(info) {
     const self = this;
+    console.log('posting signup info from profileactions');
     $.post('/api/users/signup', info)
     .done((data) => {
       self.signUpSuccess(data);
+      self.logIn(info);
     })
     .fail((data) => {
       self.signUpFail(data);
@@ -37,9 +40,12 @@ class ProfileActions {
 
   logIn(info) {
     const self = this;
+    console.log('posting login info from profileactions');
+
     $.post('/api/users/login', info)
     .done((data) => {
       self.logInSuccess(data);
+      DeckActions.setLoginState(true);
     })
     .fail((data) => {
       self.logInFail(data);
@@ -49,12 +55,16 @@ class ProfileActions {
 
   logOut() {
     const self = this;
+    console.log('posting logout info from profileactions');
+
     $.post('/api/users/logout')
     .done((data) => {
       self.logOutSuccess(data);
+    DeckActions.setLoginState(false);
     })
     .fail((data) => {
       self.logOutFail(data);
+      console.log('failed to log out');
     });
   }
 

@@ -73,18 +73,15 @@ class Navigation extends Component {
     const username = event.target[0].value;
     const password = event.target[1].value;
     ProfileActions.logIn({ username, password });
-    DeckActions.setLoginState(true);
     this.closeLogInModal();
   }
 
   logOut() {
     ProfileActions.logOut();
-    window.location.reload();
   }
 
-
   openRegisterModal() {
-      this.setState({showRegisterModal: true});
+    this.setState({showRegisterModal: true});
   }
   closeRegisterModal() {
     this.setState({showRegisterModal: false});
@@ -95,7 +92,6 @@ class Navigation extends Component {
     const username = event.target[0].value;
     const password = event.target[1].value;
     ProfileActions.signUp({ username, password });
-    ProfileActions.logIn({ username, password });
     this.closeRegisterModal();
   }
 
@@ -109,65 +105,67 @@ class Navigation extends Component {
     const RegisterModalButton = (!this.state.loggedIn) ? <NavItem onClick = {this.openRegisterModal}>Register</NavItem> : null;
     const numNotifications = this.state.transactions.filter(t => !t.acknowledged).length;
     const NotificationButton = (numNotifications) ? <NavItem>
-      Notifications <Badge>{numNotifications}</Badge>
-      </NavItem> : <NavItem />;
+    Notifications <Badge>{numNotifications}</Badge>
+</NavItem> : <NavItem />;
 
-    return (
-      <Navbar>
-      <Navbar.Header>
+return (
+  <Navbar>
+
+    <Navbar.Header>
       <Navbar.Brand>
-      <a className={s.link} href="/" onClick={Link.handleClick}>AnkiHub</a>
+        <a className={s.link} href="/" onClick={Link.handleClick}>AnkiHub</a>
       </Navbar.Brand>
       <Navbar.Toggle/>
-      </Navbar.Header>
-      <Navbar.Collapse>
+    </Navbar.Header>
+
+    <Navbar.Collapse>
       <Nav>
-      <NavItem>{this.props.children}</NavItem>
-      <NavItem>{this.state.loggedIn}</NavItem>
+        <NavItem>{this.props.children}</NavItem>
+        <NavItem>{this.state.loggedIn}</NavItem>
       </Nav>
       <Nav pullRight>
-      {LogInModalButton}
-      {RegisterModalButton}
-      {NotificationButton}
-      <NavItem href="/profile" onClick={Link.handleClick}>Profile</NavItem>
-      <NavItem href="/decks" onClick={Link.handleClick}>Decks</NavItem>
+        <NavItem href="/profile" onClick={Link.handleClick}>Profile</NavItem>
+        <NavItem href="/decks" onClick={Link.handleClick}>Decks</NavItem>
+        {LogInModalButton}
+        {RegisterModalButton}
+        {NotificationButton}
       </Nav>
-      </Navbar.Collapse>
+    </Navbar.Collapse>
 
-      <Modal show={this.state.showModal} onHide = { this.closeLogInModal }>
+    <Modal show={this.state.showModal} onHide = { this.closeLogInModal } className={s.left}>
       <Modal.Header closeButton>
-      <Modal.Title id="contained-modal-title-lg">LogIn to AnkiHub</Modal.Title>
+        <Modal.Title id="contained-modal-title-lg">LogIn to AnkiHub</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-      <form onSubmit={ this.logIn.bind(this) }>
-      <Input type="text" label="Username" placeholder="Username" ref="usernameField" value={this.state.username} />
-      <Input type="password" label="Password" ref="passwordField" />
-      <ButtonInput type="submit" value="Log In" />
-      </form>
+        <form onSubmit={ this.logIn.bind(this) }>
+          <Input type="text" label="Username" placeholder="Username" ref="usernameField" value={this.state.username} />
+          <Input type="password" label="Password" ref="passwordField" />
+          <ButtonInput type="submit" value="Log In" />
+        </form>
       </Modal.Body>
       <Modal.Footer>
-      <Button onClick={this.closeLogInModal}>Close</Button>
+        <Button onClick={this.closeLogInModal}>Close</Button>
       </Modal.Footer>
-      </Modal>
+    </Modal>
 
-      <Modal show={this.state.showRegisterModal} onHide = { this.closeRegisterModal }>
+    <Modal show={this.state.showRegisterModal} onHide = { this.closeRegisterModal } className={s.left}>
       <Modal.Header closeButton>
-      <Modal.Title id="contained-modal-title-lg">Register for AnkiHub</Modal.Title>
+        <Modal.Title id="contained-modal-title-lg">Register for AnkiHub</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-      <form onSubmit={ this.register.bind(this) }>
-      <Input type="text" label="Username" placeholder="Username" ref="usernameField" value={this.state.username} />
-      <Input type="password" label="Password" ref="passwordField" />
-      <ButtonInput type="submit" value="Register" />
-      </form>
+        <form onSubmit={ this.register.bind(this) }>
+          <Input type="text" label="Username" placeholder="Username" ref="usernameField" value={this.state.username} />
+          <Input type="password" label="Password" ref="passwordField" />
+          <ButtonInput type="submit" value="Register" />
+        </form>
       </Modal.Body>
       <Modal.Footer>
-      <Button onClick={this.closeRegisterModal}>Close</Button>
+        <Button onClick={this.closeRegisterModal}>Close</Button>
       </Modal.Footer>
-      </Modal>
-      </Navbar>
-    );
-  }
+    </Modal>
+  </Navbar>
+);
+}
 
 }
 

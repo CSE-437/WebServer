@@ -8,6 +8,7 @@
  */
 
 @import '../../../node_modules/normalize.css/normalize.css';
+
 /*! React Starter Kit | MIT License | https://www.reactstarterkit.com/ */
 @import '../variables.scss';
 /*
@@ -24,7 +25,13 @@ body {
   font-size: 20px;
   font-family: $font-family-base;
   line-height: 1.375; /* ~22px */
+  text-align: center;
 }
+
+h2, h3 {
+  font-weight: bold;
+}
+
 /*
  * Remove text-shadow in selection highlight:
  * https://twitter.com/miketaylr/status/12228805301

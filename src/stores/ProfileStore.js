@@ -48,24 +48,31 @@ class ProfileStore {
   LOGIN FUNCTIONS
   ***********************/
   onLogOutSuccess() {
+    console.log("not logged in anymore");
     this.setState(this.originalState);
+    window.location.reload();
   }
   handleLogInFail(error){
+    console.log("login fail", error);
     this.setState(this.originalState);
   }
   onSignUpSuccess(data) {
+    console.log("sign up success", data);
     const user = data.user || data;
     this.setState(objectAssign(this.originalState, {
       user,
       loggedIn: true,
     }));
+    console.log("logged in", this.state.loggedIn);
   }
   onLogInSuccess(data) {
+    console.log("login success", data);
     const user = data.user || data;
     this.setState(objectAssign(this.originalState, {
       user,
       loggedIn: true,
     }));
+    console.log("logged in", this.state.loggedIn);
   }
 
   onPostTransactionsSuccess() {
