@@ -31,14 +31,12 @@ router.post('/signup', async (req, res) => {
     newUser.signUp(null, {
       success: (user) => {
         req.session.regenerate((err) => {
-          if (err){
-            return res.status(400).json({ error: err });
-          }
           req.session.sessionToken = user.toJSON().sessionToken;
           req.session.username = user.toJSON().username;
+          req.user = user
           const u = user.toJSON();
-          u.sessionID = req.session.sessionID;
-          res.status(200).json({ user: u });
+          u.sessionID = req.sessionID;
+          res.status(200).json({ user:u });
         });
       },
       error: (user, error) => res.status(400).json({err: error, user: user.toJSON()}),

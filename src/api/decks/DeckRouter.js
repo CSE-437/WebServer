@@ -80,6 +80,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:gid', async (req, res) => {
   const query = DeckUtil.getDeckWithCardsQuery(req.gid);
+  query.descending('createdAt');
   query.find({
     success: (results) => res.status(200).json(results.map((d) => d.toJSON())),
     error: (deck, error) => res.status(400).json({ error, deck: deck.toJSON(deck) }),
@@ -145,9 +146,9 @@ router.post('/', async (req, res) => {
   }
   query.find({
     success: (results) => {
-      if (results.length > 0) {
-        return res.status(400).json({ error: 'Deck already Exist' });
-      }
+      // if (results.length > 0) {
+      //   return res.status(400).json({ error: 'Deck already Exist' });
+      // }
       // TODO : Validate Decks
       const newDeck = DeckUtil.newDeck(req.username, gid, did, req.body);
       if (!newDeck) {
